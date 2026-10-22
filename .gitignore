@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+.env
+data/
+data/*.tsv.gz
+.DS_Store
+data/*.tsv.gz
