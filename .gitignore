@@ -217,7 +217,8 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 .env
-data/
+data/*
+!data/imdb_movies.csv
 data/*.tsv.gz
 .DS_Store
 data/*.tsv.gz
