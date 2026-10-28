@@ -217,7 +217,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 .env
-data/
+data/*
+# Share the cleaned IMDb output; raw .tsv.gz files stay ignored
+!data/imdb_movies.csv
 data/*.tsv.gz
 .DS_Store
 data/*.tsv.gz
