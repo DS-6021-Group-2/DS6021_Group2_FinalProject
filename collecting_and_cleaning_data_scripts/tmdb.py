@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 def tmdb_get(endpoint, **params):
     """Fetch a v3 endpoint, e.g. tmdb_get('search/movie', query='Inception')."""
-    load_dotenv(Path(__file__).resolve().parent / ".env")
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
     token = os.getenv("token", "").strip()
     key = os.getenv("TMDB_API_KEY", "").strip()
     if not token and not key:

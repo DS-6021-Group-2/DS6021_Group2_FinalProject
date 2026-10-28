@@ -50,7 +50,7 @@ The pair (`imdb_id`, `nconst`) identifies a movie–director relationship. Repea
 
 ## Joined variables and naming
 
-**`first_model.ipynb`:** loads `data/combined_dataset.csv` rather than repeating the source join. It groups directors to keep one row per matched movie, retains `title_tmdb`, `title_imdb`, and `director_tmdb`, and replaces `nconst` / `director_imdb` with:
+**`Modeling_scripts/first_model.ipynb`:** loads `../data/combined_dataset.csv` rather than repeating the source join. It groups directors to keep one row per matched movie, retains `title_tmdb`, `title_imdb`, and `director_tmdb`, and replaces `nconst` / `director_imdb` with:
 
 | Added variable | Type | Definition |
 |---|---|---|
@@ -64,10 +64,24 @@ The in-memory `movies` table has one row per matched movie. Movies excluded by t
 
 ## Project use and cautions
 
-- **Rating target:** `vote_average`.
-- **Performance target:** derive `revenue / budget`; the 2.5× benchmark is specified, but the second boundary for bust/average/hit still needs agreement. The ratio is not net profit.
-- **Director history (planned):** use IMDb identities with TMDB dates and outcomes to calculate earlier-film count, mean rating, and performance. Only films before the target movie qualify; coverage is limited to films with the required data. IMDb `startYear` can order films by year but does not resolve which film came first within the same year.
+- **Rating:** `vote_average` is available for a separate rating analysis; the current pipeline models binary financial success.
+- **Current performance target:** `success = 1` when `revenue >= 2.5 * budget`, otherwise 0, for the financially eligible cleaned cohort. The current pipeline uses two classes; it does not implement bust/average/hit. The ratio is not net profit.
+- **Implemented director history:** earlier IMDb feature-film counts and years active, plus earlier known-outcome counts and smoothed success rates within the cleaned financial cohort. No mean-rating history is currently implemented. Same-year films are excluded; retrospective sources do not verify historical availability of outcomes.
 - Investigate zero budgets, revenues, and runtimes. Zero budget makes the ratio undefined; zero revenue is not automatically a bust.
 - For pre-release models, exclude the current movie's revenue, rating, popularity, vote count, and target-derived fields from predictors. Use chronological splits and fit preprocessing on training data only.
 
 Definitions checked against both source CSV headers and notebook join code. TMDB references: [movie details](https://developer.themoviedb.org/reference/movie-details), [credits](https://developer.themoviedb.org/reference/movie-credits).
+
+## Revised feature trial
+
+The current feature-engineering notebook writes **`data/model_data_revised.csv`**, preserving `cleaned_movies.csv` and the baseline `model_data.csv`. Budget/log-budget plots remain exploratory; neither budget variable is selected as a predictor.
+
+| Revised variable | Definition |
+|---|---|
+| `dir_prior_success_rate_smoothed` | `(earlier successes + 5 × earlier global success fraction) / (earlier known films + 5)`; global prior uses strictly earlier release years, or 0.5 when none exist. |
+| `dir_prior_films_log1p`, `dir_years_active_log1p`, `dir_prior_known_films_log1p` | Natural log of one plus each original director-experience count. |
+| `lead_actor_films_5yr_backfilled_log1p` | Natural log of one plus the existing five-year count plus eligible, non-duplicated IMDb 1985–1990 acting-principal credits for the same lead actor. |
+| `company_films_5yr_log1p`, `franchise_prior_films_log1p` | Natural log of one plus the original company/franchise experience count. |
+| `backfill_unavailable` | A 1985–1990 backfill window applies, but the actor match or target-year agreement is insufficient; the original count is retained. |
+
+`data/imdb_lead_actor_1985_1990.csv` contains distinct (`imdb_id`, `actor_imdb_id`) credits with IMDb `startYear` in 1985–1990 for matched current leads. `data/lead_actor_backfill.csv` contains one row per cleaned movie, the lead match/status, `imdb_extra_films_5yr`, `backfill_needed`, and `backfill_unavailable`. Backfill excludes current/same-year/later movies and titles already in the matched TMDB sample. Target IMDb/TMDB year disagreements are flagged rather than guessed. Only principal actor/actress credits are counted, so this is not a complete cast filmography. No total-career actor feature is used.

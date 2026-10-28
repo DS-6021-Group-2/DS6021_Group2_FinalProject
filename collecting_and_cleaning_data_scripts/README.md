@@ -29,7 +29,7 @@ Both datasets contain a column called `imdb_id` that serves as our linking varia
 
 TMDB had 10 movies with a missing `imdb_id`, and its 9 repeated IDs were those blanks counted as repeats of each other, so these 10 rows were dropped. IMDb had no missing IDs. Its repeated IDs are expected, because a movie with two directors has two rows.
 
-An inner merge was done on `imdb_id` with the suffixes `_tmdb` and `_imdb` on the overlapping columns. It kept 13,276 of the 14,499 TMDB movies; the other 1,223 are not listed as `movie` in IMDb. The combined dataset has 14,824 rows (one per movie and director pair) and 22 columns and is saved as `combined_dataset.csv`.
+An inner merge was done on `imdb_id` with the suffixes `_tmdb` and `_imdb` on the overlapping columns. It kept 13,276 of the 14,499 TMDB movies; the other 1,223 lack an eligible match in this IMDb director extract; the join alone does not establish why each is absent. The combined dataset has 14,824 rows (one per movie and director pair) and 22 columns and is saved as `combined_dataset.csv`.
 
 Titles match exactly in about 92% of rows. The rest are the same movies under different title versions, such as "Nikita" and "La Femme Nikita", which is expected because the merge uses `imdb_id`, not titles.
 
@@ -61,3 +61,11 @@ Decisions agreed by the team:
 | Runtime of 0 | Set to missing | Filled later in the model pipeline using training data only |
 
 `revenue`, `revenue_to_budget`, `popularity`, `vote_count`, and `vote_average` are known only after release or are built from the target, so they must never be used as predictors for the current movie.
+
+## Additional files
+
+- `api_access.ipynb`: optional read-only preview of the saved TMDB CSV; no API calls or package installation.
+- `tmdb.py`: optional TMDB request helper and connection check. It reads credentials from the repository-root `.env`; running it makes an API request. It is not required for the installed CSVs.
+- `imdb_actor_backfill.py`: creates the separate 1985–1990 lead-actor credit reference and movie-level backfill. It requires local IMDb basics, principals, and name downloads. From the repository root, run `/opt/miniconda3/envs/ds6001/bin/python collecting_and_cleaning_data_scripts/imdb_actor_backfill.py`. Existing differing supplements cause it to stop rather than overwrite.
+
+Use the `ds6001` notebook kernel, with this folder as the notebook working directory. Source pulling, joining, and cleaning can write their CSV outputs; skip those steps when you only want to inspect the installed data. Feature engineering is described in `../Feature_engineering_scripts/README.md`.
