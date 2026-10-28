@@ -222,6 +222,7 @@ data/*
 !data/imdb_movies.csv
 !data/combined_dataset.csv
 !data/cleaned_movies.csv
+!data/model_data.csv
 data/*.tsv.gz
 .DS_Store
 data/*.tsv.gz
