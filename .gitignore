@@ -221,6 +221,8 @@ data/*
 # Share the cleaned IMDb output; raw .tsv.gz files stay ignored
 !data/imdb_movies.csv
 !data/combined_dataset.csv
+!data/cleaned_movies.csv
+!data/model_data.csv
 data/*.tsv.gz
 .DS_Store
 data/*.tsv.gz
