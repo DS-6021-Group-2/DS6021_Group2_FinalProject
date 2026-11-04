@@ -29,10 +29,10 @@ The join retains **13,276 unique movies**. Co-directors explain why the combined
 |---|---|
 | One row per movie | Groups director IDs/names before movie-level analysis. |
 | Usable financial outcomes | Requires budget and revenue above zero. |
-| Financial floors | Keeps budgets ≥ $250,000 and revenues ≥ $1,000; this also excludes some valid low-budget films. |
+| Financial floors | Keeps budgets ≥ 250,000 dollars and revenues ≥ 1,000 dollars. This also excludes some valid low-budget films. |
 | Target | `success = 1` when revenue ≥ 2.5 × budget; otherwise 0. |
 | Runtime | Changes zero to missing for later training-only imputation. |
-| Certification | Fills missing values with `Unknown`; groups R and NC-17 together. |
+| Certification | Fills missing values with `Unknown`. Groups R and NC-17 together. |
 
 The result has **2,504 hits out of 6,919 movies**. Zero financial values are treated as unreported, not automatic busts. The separate rating dataset is later built from the broader combined data without these financial filters; see [feature engineering](../Feature_engineering_scripts/README.md).
 
@@ -49,8 +49,8 @@ Source snapshots were collected on **October 28, 2026**; later pulls can change.
 | File | Purpose |
 |---|---|
 | [api_access.ipynb](api_access.ipynb) | Preview the saved TMDB CSV without an API request. |
-| [tmdb.py](tmdb.py) | Optional TMDB client/connection check; running it makes an API request. |
-| [imdb_actor_backfill.py](imdb_actor_backfill.py) | Build the original cohort's 1985–1990 actor supplement; stop if an existing output differs. |
+| [tmdb.py](tmdb.py) | Optional TMDB client/connection check. Running it makes an API request. |
+| [imdb_actor_backfill.py](imdb_actor_backfill.py) | Build the original cohort's 1985–1990 actor supplement. Stop if an existing output differs. |
 
 For the actor script, run from the repository root:
 
