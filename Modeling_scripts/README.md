@@ -1,16 +1,36 @@
-# Modeling
+# Modeling guide
 
-Models are separated by their prediction target. Both tasks use the feature-engineering output, `../data/model_data.csv`.
+There are **two different prediction tasks**. Choose the folder that matches your target.
 
-| Folder | Target | Task |
-|---|---|---|
-| [rating_models](rating_models/README.md) | `vote_average` | Predict TMDB viewer ratings with regression. Includes Linear, Random Forest, Ridge, Support Vector, and Gradient Boosting notebooks. |
-| [success_models](success_models/README.md) | `success` | Binary financial classification: hit if revenue reaches 2.5 times budget, bust otherwise. Includes Logistic Regression, Random Forest, and Gradient Boosting classifiers. |
+| Task | Target | Dataset | Start with |
+|---|---|---|---|
+| Predict a viewer rating | `vote_average` | `model_data_rating.csv` — 13,276 movies | [Simple rating model](rating_models/simple_model.ipynb) |
+| Predict hit or bust | `success` (1 or 0) | `model_data_success.csv` — 6,919 movies | [Simple success model](success_models/simple_model.ipynb) |
 
-Run each notebook from its own subfolder with the `ds6001` kernel. From either subfolder the dataset path is `../../data/model_data.csv`. Exclude both targets and identifiers from predictors. Use chronological splits and training-only preprocessing; compare models within the same task and split.
+Use **`ds6001`**, run each notebook from its own subfolder, and run cells from top to bottom. Model notebooks read the saved data; they do not overwrite CSVs.
 
-The current financial task is binary hit/bust, not three-class classification. Regression metrics such as MAE/RMSE belong to ratings; classification metrics belong to success predictions. See each folder's README for details.
+## Simple or detailed?
 
-Every detailed notebook includes **Section 4: Validation and tuning**. Rating models select by validation MAE (OLS receives validation only); success models use hit F1 with a mean validation precision guard for final selection. Both use training-only chronological folds and show original versus selected results. Section 4b compares feature groups and additionally selects a success threshold using training-period validation. Success candidates must meet the configured validation precision requirement, then are ranked by hit F1. Original and settings-only results remain visible.
+- **Simple notebooks:** start with nine predictors and a fixed linear/logistic model. An optional section tries a few small feature sets.
+- **Detailed notebooks:** compare more predictors, tune model settings, and inspect prediction errors. Success notebooks also test decision thresholds.
 
-For a smaller starting point, each subfolder includes **`simple_model.ipynb`** with nine predictors: linear regression for ratings and logistic regression for success. These simple baselines use the shared chronological split and training-only preprocessing without hyperparameter tuning. Optional Section 5 compares six compact feature presets using training-period validation. The validation/tuning descriptions above apply to the detailed notebooks.
+See the [rating guide](rating_models/README.md) or [success guide](success_models/README.md) for notebook lists and results.
+
+## How we compare models
+
+Train on movies released **before November 18, 2017** and test on movies released on or after that date.
+
+| Dataset | Training movies | Test movies |
+|---|---:|---:|
+| Ratings | 9,405 | 3,871 |
+| Success | 5,535 | 1,384 |
+
+Settings and features are selected using three earlier-to-later validation splits **inside the training data**. Missing-value filling, encoding, and scaling are learned from training rows only. Current-movie targets and identifiers are excluded from predictors.
+
+**Ratings:** prefer lower MAE. **Success:** require at least 70% mean validation hit precision, then compare hit F1. The success guide explains the trade-off.
+
+The expanded rating dataset has a different test population from earlier experiments. These data and results have also been inspected repeatedly, so results are exploratory rather than an independent final evaluation.
+
+## Tuning and graphs
+
+Change settings in the **Tuning controls** cell at the top of each notebook, save, and Run All. The final cell refreshes local reports for [model_visualizations.ipynb](../Data_visualization/model_visualizations.ipynb). This combines graphs for every model; see the [visualization guide](../Data_visualization/README.md).

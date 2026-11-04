@@ -224,7 +224,12 @@ data/*
 !data/lead_actor_backfill.csv
 !data/combined_dataset.csv
 !data/cleaned_movies.csv
-!data/model_data.csv
+!data/model_data_success.csv
+!data/model_data_rating.csv
 data/*.tsv.gz
 .DS_Store
 data/*.tsv.gz
+
+# Regenerable model-visualization reports and optional figure exports
+Data_visualization/results/
+Data_visualization/figures/

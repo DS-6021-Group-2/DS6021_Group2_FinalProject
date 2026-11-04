@@ -50,7 +50,7 @@ The pair (`imdb_id`, `nconst`) identifies a movie–director relationship. Repea
 
 ## Joined variables and naming
 
-**`Modeling_scripts/rating_models/linear_model.ipynb`:** trains linear regression for `vote_average` using `../../data/model_data.csv`, an earlier/later chronological split, and training-only preprocessing. Both targets and identifiers are excluded from predictors. It compares MAE, RMSE, and R² with a training-mean baseline and does not change CSVs.
+**`Modeling_scripts/rating_models/linear_model.ipynb`:** trains linear regression for `vote_average` using `../../data/model_data_rating.csv`, an earlier/later chronological split, and training-only preprocessing. Current-movie outcomes and identifiers are excluded from predictors. It compares MAE, RMSE, and R² with a training-mean baseline and does not change CSVs.
 
 **`collecting_and_cleaning_data_scripts/data_cleaning.ipynb`:** groups the combined movie–director rows to one movie row and replaces `nconst` / `director_imdb` with:
 
@@ -66,7 +66,8 @@ The in-memory `movies` table has one row per matched movie. Movies excluded by t
 
 ## Project use and cautions
 
-- **Rating target:** `vote_average` is retained in `model_data.csv` for rating regression alongside the binary financial target `success`. Exclude both targets from predictors for either model.
+- **Rating target:** `vote_average` in `model_data_rating.csv`; 13,276 matched rated movies without financial filters. Exclude the rating from predictors.
+- **Financial dataset:** `model_data_success.csv` preserves the former 6,919-movie model table, including both outcome columns. Exclude both `success` and `vote_average` from success predictors.
 - **Current performance target:** `success = 1` when `revenue >= 2.5 * budget`, otherwise 0, for the financially eligible cleaned cohort. The current task is binary hit/bust (1/0), with classifier notebooks organized under `Modeling_scripts/success_models/`. The ratio is not net profit.
 - **Implemented director history:** earlier IMDb feature-film counts and years active, plus earlier known-outcome counts and smoothed success rates within the cleaned financial cohort. The broader matched sample also supplies earlier-year director rating history, using TMDB ratings linked through IMDb IDs. Same-year films are excluded; retrospective sources do not verify historical availability of outcomes.
 - Investigate zero budgets, revenues, and runtimes. Zero budget makes the ratio undefined; zero revenue is not automatically a bust.
@@ -76,7 +77,7 @@ Definitions checked against both source CSV headers and notebook join code. TMDB
 
 ## Revised feature trial
 
-The current feature-engineering notebook writes the revised predictors to **`data/model_data.csv`**, preserving `cleaned_movies.csv`. Budget/log-budget plots remain exploratory; neither budget variable is selected as a predictor.
+The current feature-engineering notebook writes **`data/model_data_success.csv`** and **`data/model_data_rating.csv`**, preserving `cleaned_movies.csv`. Budget/log-budget plots remain exploratory; neither budget variable is selected as a predictor.
 
 | Revised variable | Definition |
 |---|---|
@@ -98,4 +99,10 @@ The current feature-engineering notebook writes the revised predictors to **`dat
 | `dir_prior_rating_mean` | Inspection only in the feature notebook: unshrunk earlier-film mean, missing when no history exists. |
 | `dir_prior_rated_films` | Inspection only: supporting raw count before `log1p`. |
 
-Reference: the broader matched TMDB/IMDb table, including financially ineligible films. Compare TMDB release years on both sides. Exclude current, same-year, and future films; co-directed films count once. The current movie's `vote_average` remains a target, never an input. Earlier-film ratings come from retrospective snapshots and are not verified historical release-time ratings. `model_data.csv` has 45 columns after this addition.
+Reference: the broader matched TMDB/IMDb table, including financially ineligible films. Compare TMDB release years on both sides. Exclude current, same-year, and future films; co-directed films count once. The current movie's `vote_average` remains a target, never an input. Earlier-film ratings come from retrospective snapshots and are not verified historical release-time ratings. `model_data_success.csv` has 45 columns; the expanded `model_data_rating.csv` has 44 because it has only the rating target, not current-movie success.
+
+## Task-specific model exports
+
+The original shared model table is renamed to `model_data_success.csv` without changing its cohort or values. `model_data_rating.csv` is constructed from unique combined movies with valid dates/ratings, applying nonfinancial preparation and the same predictor definitions. Missing finances are not labeled as busts. Shared predictors/ratings match exactly across files. Neither budget nor revenue is a predictor.
+
+The success objective now requires 0.70 mean training-validation hit precision, then maximizes hit F1 among qualifying settings/features/thresholds. If infeasible, notebooks report it rather than relax the target. This validation requirement does not guarantee later test precision.
