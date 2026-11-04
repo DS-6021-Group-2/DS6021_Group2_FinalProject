@@ -4,10 +4,10 @@
 
 | Task | Model input | Movies | Columns | Target |
 |---|---|---:|---:|---|
-| Predict viewer ratings | [model_data_rating.csv](model_data_rating.csv) | **13,276** | 44 | `vote_average` |
-| Predict hit or bust | [model_data_success.csv](model_data_success.csv) | **6,919** | 45 | `success` |
+| Predict viewer ratings | [model_data_rating.csv](model_data_rating.csv) | **13,276** | 45 | `vote_average` |
+| Predict hit or bust | [model_data_success.csv](model_data_success.csv) | **6,919** | 46 | `success` |
 
-Both contain **39 predictors** and four identifier/date columns. The success table also retains `vote_average`, but neither current-movie outcome belongs in its predictor inputs. The old shared model filename has been replaced by these two files.
+Both contain **40 predictors** and four identifier/date columns. The success table also retains `vote_average`, but neither current-movie outcome belongs in its predictor inputs. The old shared model filename has been replaced by these two files.
 
 ## Why are the sizes different?
 
@@ -41,3 +41,5 @@ Earlier histories exclude current/same-year/later films, but they are incomplete
 The sample favors movies with enough TMDB votes; it is not every movie. Large IMDb `.tsv.gz` downloads are local rebuild inputs and are ignored by Git. Existing CSVs do not need another download.
 
 Reading data does not change a CSV. Export code and incoming Git changes can change files; `.gitignore` does not protect tracked datasets from overwrites.
+
+`log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Source and cleaned CSVs are unchanged.

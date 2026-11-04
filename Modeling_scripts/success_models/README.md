@@ -22,7 +22,7 @@ Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this
 
 | Notebook | What it tries |
 |---|---|
-| [Simple model](simple_model.ipynb) | Nine-predictor logistic baseline, then small feature/threshold comparisons. |
+| [Simple model](simple_model.ipynb) | Ten-predictor logistic baseline, then small feature/threshold comparisons. |
 | [Logistic regression](logistic_regression.ipynb) | A regularized linear classifier. |
 | [Random Forest](random_forest.ipynb) | Many decision trees combined. |
 | [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
@@ -47,12 +47,12 @@ All four candidates met the **validation** precision requirement. The table show
 
 | Model | Hit threshold | Test precision | Test recall | Test hit F1 |
 |---|---:|---:|---:|---:|
-| Logistic regression | 0.80 | **74.3%** | 11.6% | 0.200 |
-| Random Forest | 0.50 | 51.2% | 34.7% | 0.414 |
-| Gradient Boosting | 0.65 | 61.7% | 21.1% | 0.314 |
-| Simple model | 0.70 | 61.9% | 13.7% | 0.224 |
+| Logistic regression | 0.65 | 64.8% | 26.7% | 0.379 |
+| Random Forest | 0.55 | 60.3% | 27.8% | 0.380 |
+| Gradient Boosting | 0.60 | 55.4% | 29.1% | 0.381 |
+| Simple model | 0.65 | 63.9% | 19.4% | 0.297 |
 
-**Interpretation:** logistic regression predicted hits more cautiously. It reached 74.3% test precision but found only **55 of 475 actual hits**. Higher precision came with low recall and F1. No model is strongest on every metric.
+**Budget update:** all models now include `log_budget`. After rerunning the same validation procedure, logistic test hit F1 rose from 0.200 to 0.379, gradient boosting from 0.314 to 0.381, and simple logistic from 0.224 to 0.297; random forest fell from 0.414 to 0.380. Selection can change settings, features, and thresholds, so these are comparisons of the full procedures. At fixed original settings and threshold 0.5, adding budget increased logistic F1 from 0.500 to 0.531. None of the selected models reached 70% precision on the later test data.
 
 ## Finding things in the notebooks
 
@@ -69,4 +69,4 @@ The simple notebook keeps its original baseline in Sections 1–4 and tries smal
 
 Train before **November 18, 2017** (5,535 movies); test on or after it (1,384 movies). Select settings/features/thresholds using three chronological validation splits inside training, with training-only preprocessing.
 
-Exclude both `success` and `vote_average`, movie identifiers, budget, and revenue from predictors. Earlier histories are incomplete and retrospective. The 70% guard applies to the mean across validation periods, not each period or future movies. Repeated inspection makes these exploratory results, not a future precision guarantee.
+Exclude both `success` and `vote_average`, movie identifiers, raw budget, and revenue from predictors. Earlier histories are incomplete and retrospective. The 70% guard applies to the mean across validation periods, not each period or future movies. Repeated inspection makes these exploratory results, not a future precision guarantee.

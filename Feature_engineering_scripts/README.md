@@ -35,7 +35,7 @@ Source and cleaned CSVs are preserved. Identical model exports are reused. If an
 
 **Smoothing** pulls small director records toward the earlier overall average, using a five-film prior. **`log1p`** compresses large experience counts while keeping zero at zero. Raw counts and averages remain available in the notebook. See the [codebook](../CODEBOOK.md) for exact formulas.
 
-Budget/log-budget plots are kept for interpretation. Budget and revenue are excluded from predictors. Current-movie ratings and success labels are outcomes, not predictors. Models fill missing values, encode categories, and scale using training data only.
+`log_budget = log10(budget)` is included as a numeric movie characteristic, with budget plots retained for interpretation. Raw budget and revenue are excluded from predictors. Current-movie ratings and success labels are outcomes, not predictors. Models fill missing values, encode categories, and scale using training data only.
 
 ## History coverage
 
@@ -50,3 +50,5 @@ To rebuild the original actor supplement, place the required IMDb downloads in `
 ```
 
 See the [collection guide](../collecting_and_cleaning_data_scripts/README.md) for download requirements. Normal modeling uses the existing files.
+
+`log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Source and cleaned CSVs are unchanged.
