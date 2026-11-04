@@ -222,7 +222,6 @@ data/*
 !data/imdb_movies.csv
 !data/imdb_lead_actor_1985_1990.csv
 !data/lead_actor_backfill.csv
-!data/model_data_revised.csv
 !data/combined_dataset.csv
 !data/cleaned_movies.csv
 !data/model_data.csv
