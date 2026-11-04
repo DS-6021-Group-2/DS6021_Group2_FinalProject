@@ -11,7 +11,7 @@ Use **`ds6001`**, run each notebook from its own subfolder, and run cells from t
 
 ## Simple or detailed?
 
-- **Simple notebooks:** start with nine predictors and a fixed linear/logistic model. An optional section tries a few small feature sets.
+- **Simple notebooks:** start with ten predictors and a fixed linear/logistic model. An optional section tries a few small feature sets.
 - **Detailed notebooks:** compare more predictors, tune model settings, and inspect prediction errors. Success notebooks also test decision thresholds.
 
 See the [rating guide](rating_models/README.md) or [success guide](success_models/README.md) for notebook lists and results.

@@ -21,7 +21,7 @@ Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this
 
 | Notebook | What it tries |
 |---|---|
-| [Simple model](simple_model.ipynb) | Nine predictors and linear regression; optional small feature comparisons. |
+| [Simple model](simple_model.ipynb) | Ten predictors and linear regression; optional small feature comparisons. |
 | [Linear model](linear_model.ipynb) | Linear regression with the larger feature set. |
 | [Ridge](ridge_model.ipynb) | Linear regression with coefficient shrinkage. |
 | [Support Vector Regression](support_vector.ipynb) | Nonlinear relationships between features and ratings. |
@@ -40,19 +40,19 @@ The baseline predicts **the training mean rating for every movie**. Beat that be
 
 ## Current test results
 
-All rows use the same **3,871 later movies**. Detailed-model rows show the validation-selected model; the simple row below shows its original fixed nine-predictor baseline.
+All rows use the same **3,871 later movies**. Detailed-model rows show the validation-selected model; the simple row below shows its original fixed ten-predictor baseline.
 
 | Model | MAE ↓ | RMSE ↓ | R² ↑ |
 |---|---:|---:|---:|
 | Training-mean baseline | 0.612 | 0.775 | −0.073 |
-| Simple linear, nine predictors | 0.551 | 0.704 | 0.114 |
-| Detailed linear | 0.552 | 0.695 | 0.136 |
-| Ridge | 0.551 | 0.694 | 0.139 |
-| Support Vector Regression | **0.475** | **0.607** | **0.341** |
-| Random Forest | 0.508 | 0.646 | 0.254 |
-| Gradient Boosting | 0.507 | 0.644 | 0.259 |
+| Simple linear, ten predictors | 0.551 | 0.704 | 0.113 |
+| Detailed linear | 0.553 | 0.696 | 0.133 |
+| Ridge | 0.552 | 0.695 | 0.137 |
+| Support Vector Regression | 0.475 | 0.606 | 0.343 |
+| Random Forest | 0.511 | 0.648 | 0.248 |
+| Gradient Boosting | 0.504 | 0.640 | 0.267 |
 
-**Interpretation:** SVR currently has the lowest test error, about 0.475 rating points. This is an observed comparison, not proof it will always be the best model. The simple notebook's optional genre preset had better validation MAE but worse test MAE (0.562); the original baseline is retained.
+All models now include `log_budget`. Unknown budgets are median-imputed inside training only. Adding budget produced small, mixed rating changes on the same test movies; it did not consistently improve prediction. The simple notebook also shows its optional validation-selected preset separately. Results remain exploratory.
 
 ## Finding things in the notebooks
 
