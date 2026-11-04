@@ -25,6 +25,7 @@ Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this
 | [Linear model](linear_model.ipynb) | Linear regression with the larger feature set. |
 | [Ridge](ridge_model.ipynb) | Linear regression with coefficient shrinkage. |
 | [Support Vector Regression](support_vector.ipynb) | Nonlinear relationships between features and ratings. |
+| [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
 | [Random Forest](random_forest.ipynb) | An average of many decision trees. |
 | [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
 
@@ -49,6 +50,7 @@ All rows use the same **3,871 later movies**. Detailed-model rows show the valid
 | Detailed linear | 0.553 | 0.696 | 0.133 |
 | Ridge | 0.552 | 0.695 | 0.137 |
 | Support Vector Regression | 0.475 | 0.606 | 0.343 |
+| KNN + PCA | 0.537 | 0.685 | 0.161 |
 | Random Forest | 0.511 | 0.648 | 0.248 |
 | Gradient Boosting | 0.504 | 0.640 | 0.267 |
 
@@ -70,3 +72,7 @@ The simple notebook has four baseline sections and an optional feature compariso
 Training ends before **November 18, 2017**: 9,405 training movies and 3,871 test movies. Preprocessing is fitted within training. Current `vote_average` is the target, never an input.
 
 Earlier ratings are observed snapshots, not a complete director filmography or verified historical release-time ratings. Early actor-history coverage is incomplete and flagged. History updates through time, so these are rolling predictions. The expanded test population and repeated inspection mean the results remain exploratory; do not compare them directly with old scores on only financially eligible movies.
+
+For KNN + PCA, edit `PCA_SETTINGS` and `PARAM_GRID` near the top. Section 7 shows retained components and a fixed-settings validation comparison against KNN without PCA. No CSVs are changed.
+
+KNN + PCA selected 35 distance-weighted neighbors and 95% retained input variance (42 components). Its test MAE is higher than SVR. At fixed original settings, PCA slightly worsened validation MAE: 0.554 without PCA versus 0.558 with PCA.
