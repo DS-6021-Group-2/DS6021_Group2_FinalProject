@@ -50,7 +50,9 @@ The pair (`imdb_id`, `nconst`) identifies a movie–director relationship. Repea
 
 ## Joined variables and naming
 
-**`Modeling_scripts/first_model.ipynb`:** loads `../data/combined_dataset.csv` rather than repeating the source join. It groups directors to keep one row per matched movie, retains `title_tmdb`, `title_imdb`, and `director_tmdb`, and replaces `nconst` / `director_imdb` with:
+**`Modeling_scripts/rating_models/linear_model.ipynb`:** trains linear regression for `vote_average` using `../../data/model_data.csv`, an earlier/later chronological split, and training-only preprocessing. Both targets and identifiers are excluded from predictors. It compares MAE, RMSE, and R² with a training-mean baseline and does not change CSVs.
+
+**`collecting_and_cleaning_data_scripts/data_cleaning.ipynb`:** groups the combined movie–director rows to one movie row and replaces `nconst` / `director_imdb` with:
 
 | Added variable | Type | Definition |
 |---|---|---|
@@ -60,13 +62,13 @@ The pair (`imdb_id`, `nconst`) identifies a movie–director relationship. Repea
 
 The in-memory `movies` table has one row per matched movie. Movies excluded by the earlier inner join are not restored. `release_date` is parsed as a date. No `imdb_matched` flag is needed because all input rows are already matched.
 
-**`combining_data.ipynb`:** defines an inner join without aggregating directors. Its naming is different: `title_tmdb` / `title_imdb` and `director_tmdb` / `director_imdb`; `nconst` remains a separate column. Other TMDB columns keep their names, and IMDb `startYear` is retained. The updated combined file has 14,824 movie–director rows, 22 columns, and 13,276 unique movies. This join retains only matched movies and can produce several rows per movie. These names describe that notebook's join, not the `first_model.ipynb` table.
+**`combining_data.ipynb`:** defines an inner join without aggregating directors. Its naming is different: `title_tmdb` / `title_imdb` and `director_tmdb` / `director_imdb`; `nconst` remains a separate column. Other TMDB columns keep their names, and IMDb `startYear` is retained. The updated combined file has 14,824 movie–director rows, 22 columns, and 13,276 unique movies. This join retains only matched movies and can produce several rows per movie. The model table retains identifiers, engineered predictors, and targets rather than all joined source fields.
 
 ## Project use and cautions
 
-- **Rating:** `vote_average` is available for a separate rating analysis; the current pipeline models binary financial success.
-- **Current performance target:** `success = 1` when `revenue >= 2.5 * budget`, otherwise 0, for the financially eligible cleaned cohort. The current pipeline uses two classes; it does not implement bust/average/hit. The ratio is not net profit.
-- **Implemented director history:** earlier IMDb feature-film counts and years active, plus earlier known-outcome counts and smoothed success rates within the cleaned financial cohort. No mean-rating history is currently implemented. Same-year films are excluded; retrospective sources do not verify historical availability of outcomes.
+- **Rating target:** `vote_average` is retained in `model_data.csv` for rating regression alongside the binary financial target `success`. Exclude both targets from predictors for either model.
+- **Current performance target:** `success = 1` when `revenue >= 2.5 * budget`, otherwise 0, for the financially eligible cleaned cohort. The current task is binary hit/bust (1/0), with classifier notebooks organized under `Modeling_scripts/success_models/`. The ratio is not net profit.
+- **Implemented director history:** earlier IMDb feature-film counts and years active, plus earlier known-outcome counts and smoothed success rates within the cleaned financial cohort. The broader matched sample also supplies earlier-year director rating history, using TMDB ratings linked through IMDb IDs. Same-year films are excluded; retrospective sources do not verify historical availability of outcomes.
 - Investigate zero budgets, revenues, and runtimes. Zero budget makes the ratio undefined; zero revenue is not automatically a bust.
 - For pre-release models, exclude the current movie's revenue, rating, popularity, vote count, and target-derived fields from predictors. Use chronological splits and fit preprocessing on training data only.
 
@@ -74,7 +76,7 @@ Definitions checked against both source CSV headers and notebook join code. TMDB
 
 ## Revised feature trial
 
-The current feature-engineering notebook writes **`data/model_data_revised.csv`**, preserving `cleaned_movies.csv` and the baseline `model_data.csv`. Budget/log-budget plots remain exploratory; neither budget variable is selected as a predictor.
+The current feature-engineering notebook writes the revised predictors to **`data/model_data.csv`**, preserving `cleaned_movies.csv`. Budget/log-budget plots remain exploratory; neither budget variable is selected as a predictor.
 
 | Revised variable | Definition |
 |---|---|
@@ -85,3 +87,15 @@ The current feature-engineering notebook writes **`data/model_data_revised.csv`*
 | `backfill_unavailable` | A 1985–1990 backfill window applies, but the actor match or target-year agreement is insufficient; the original count is retained. |
 
 `data/imdb_lead_actor_1985_1990.csv` contains distinct (`imdb_id`, `actor_imdb_id`) credits with IMDb `startYear` in 1985–1990 for matched current leads. `data/lead_actor_backfill.csv` contains one row per cleaned movie, the lead match/status, `imdb_extra_films_5yr`, `backfill_needed`, and `backfill_unavailable`. Backfill excludes current/same-year/later movies and titles already in the matched TMDB sample. Target IMDb/TMDB year disagreements are flagged rather than guessed. Only principal actor/actress credits are counted, so this is not a complete cast filmography. No total-career actor feature is used.
+
+## Earlier director rating history
+
+| Variable | Role / definition |
+|---|---|
+| `dir_prior_rating_smoothed` | Numeric predictor, 0–10: `(sum of earlier director-film ratings + 5 × earlier global mean rating) / (earlier rated films + 5)`. The prior uses distinct earlier reference movies; fallback 5.0 only if none exist. |
+| `dir_prior_rated_films_log1p` | Numeric predictor: `ln(1 + count of distinct earlier rated films)` across the movie's directors. |
+| `dir_no_rating_history` | Binary predictor: 1 when no earlier rated film is observed for the director(s). |
+| `dir_prior_rating_mean` | Inspection only in the feature notebook: unshrunk earlier-film mean, missing when no history exists. |
+| `dir_prior_rated_films` | Inspection only: supporting raw count before `log1p`. |
+
+Reference: the broader matched TMDB/IMDb table, including financially ineligible films. Compare TMDB release years on both sides. Exclude current, same-year, and future films; co-directed films count once. The current movie's `vote_average` remains a target, never an input. Earlier-film ratings come from retrospective snapshots and are not verified historical release-time ratings. `model_data.csv` has 45 columns after this addition.
