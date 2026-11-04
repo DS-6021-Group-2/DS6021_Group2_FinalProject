@@ -1,46 +1,39 @@
-# DS6021_Group2_FinalProject
+# DS 6021 Movie Prediction Project
 
-## Project question
-How accurately can we predict a movie's TMDB viewer rating and classify its box-office performance as a hit or bust using movie characteristics and earlier film history? A hit means reported worldwide revenue reaches at least 2.5 times production budget.
+We predict two things from movie characteristics and earlier film history:
 
-## Repository structure and run order
+- **Viewer rating:** the movie's TMDB `vote_average`.
+- **Financial success:** a **hit** if revenue reaches at least 2.5 times production budget; a **bust** otherwise.
 
-| Folder / file | Purpose |
+## Start here
+
+The datasets are already saved. Start with a simple model; collection notebooks are only needed when rebuilding the data.
+
+| I want to… | Open |
 |---|---|
-| `collecting_and_cleaning_data_scripts/` | Source collection, IMDb actor supplement, joining, and cleaning. |
-| `Feature_engineering_scripts/` | Prepare features for modeling; see its [README](Feature_engineering_scripts/README.md). |
-| `Modeling_scripts/` | Separate `rating_models/` regressors and `success_models/` hit/bust classifiers; see the folder READMEs. |
-| `data/` | Source data, intermediate tables, and model snapshots; see its README for schemas and counts. |
-| `CODEBOOK.md` | Variable definitions across TMDB, IMDb, and revised features. |
-| `requirements.txt` | Python dependencies. |
+| Predict viewer ratings | [Simple rating model](Modeling_scripts/rating_models/simple_model.ipynb) |
+| Predict hits and busts | [Simple success model](Modeling_scripts/success_models/simple_model.ipynb) |
+| Compare the other models | [Modeling guide](Modeling_scripts/README.md) |
+| Understand the datasets or variables | [Dataset guide](data/README.md) · [Codebook](CODEBOOK.md) |
 
-Use `/opt/miniconda3/envs/ds6001/bin/python` (the `ds6001` notebook kernel). Run each notebook from its containing folder so `../data/` resolves correctly. The root `.env` holds credentials and is ignored by Git.
+Use the **`ds6001` Python kernel** and run notebooks from their own folders, from top to bottom.
 
-1. Source notebooks: `pulling_tmdb_data.ipynb` and `pulling_imdb_data.ipynb` in the collection folder. Skip these when using the installed CSVs.
-2. `collecting_and_cleaning_data_scripts/combining_data.ipynb` creates the matched movie–director table.
-3. `collecting_and_cleaning_data_scripts/data_cleaning.ipynb` creates one cleaned row per movie and the binary target.
-4. The actor-backfill script creates the early-history supplement if it needs rebuilding.
-5. `Feature_engineering_scripts/feature_engineering.ipynb` verifies or creates `data/model_data.csv`.
-6. `Modeling_scripts/rating_models/linear_model.ipynb` is the linear rating baseline; the modeling folder also contains Random Forest, Ridge, Support Vector, and Gradient Boosting regressors. See its README for comparisons.
+## How the project fits together
 
-Collection, joining, and cleaning notebooks can overwrite their outputs. The feature notebook refuses to replace a differing existing model snapshot. Reading data for exploration does not change a CSV.
+**Collect → combine → clean → create features → train and compare models**
 
-Feature engineering prepares movie characteristics and earlier-film history for modeling. See the [feature engineering README](Feature_engineering_scripts/README.md) for the methods, inputs, and output details.
+| Folder | Purpose |
+|---|---|
+| [Collection and cleaning](collecting_and_cleaning_data_scripts/README.md) | Get the source data, join movies to directors, and prepare financial labels. |
+| [Feature engineering](Feature_engineering_scripts/README.md) | Build the two model datasets. |
+| [Modeling](Modeling_scripts/README.md) | Separate rating regressors and hit/bust classifiers. |
+| [Visualizations](Data_visualization/README.md) | Compare all model results and inspect prediction errors. |
+| [Data](data/README.md) | Saved source files and model inputs. |
 
-## Data sources
+Feature engineering produces **`model_data_rating.csv`** (13,276 movies) and **`model_data_success.csv`** (6,919 movies). Each model folder uses its matching dataset.
 
-### TMDB API
-- Source: https://developer.themoviedb.org/
-- Pulled: 10/28/2026. TMDB data changes over time, so a later pull may produce slightly different results.
-- Running `pulling_tmdb_data.ipynb` requires a free TMDB API Read Access Token, saved in a `.env` file in the project folder as `token=<your token>`. The `.env` file is excluded by `.gitignore`.
+## Sources
 
-### IMDb Non-Commercial Datasets
-- Source: https://datasets.imdbws.com/
-- Downloaded: 10/28/2026. IMDb refreshes these files daily, so a later download may produce slightly different results.
-- Files used by `collecting_and_cleaning_data_scripts/pulling_imdb_data.ipynb`:
-  - `title.basics.tsv.gz` (title, title type, and release year)
-  - `title.crew.tsv.gz` (director IDs)
-  - `name.basics.tsv.gz` (director names)
-- These files are too large for GitHub and are excluded by `.gitignore`. To re-run the notebook, download the three
-  files from the link above and place them, still gzipped, in the `data/` folder.
-- IMDb permits use of these datasets for personal and non-commercial purposes only.
+[TMDB](https://developer.themoviedb.org/) supplies movie details, ratings, and finances. [IMDb](https://datasets.imdbws.com/) supplies film and person identities for earlier-film histories. The source snapshots were collected on October 28, 2026; later downloads can differ.
+
+Dependencies are listed in [requirements.txt](requirements.txt). Collection credentials belong in the ignored root `.env` file; setup details are in the collection guide.
