@@ -1,4 +1,5 @@
 # DS 6021 Movie Prediction Project
+#### Shuvam Chowdhury, Merasia Johnson, Claire Jones, Daniel Nachmann, Walt Roou
 
 We predict two things from movie characteristics and earlier film history:
 
