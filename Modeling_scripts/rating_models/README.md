@@ -9,7 +9,7 @@
 Every notebook now starts with **Tuning controls — edit here first**. Change that one settings cell, save, and **Run All**. Later validation sections read those controls instead of resetting them.
 
 - `MODEL_SETTINGS`: the original estimator and settings not searched.
-- `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search. OLS has an empty grid.
+- `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search. OLS searches preprocessing choices; ridge also searches `alpha`.
 - `FEATURE_GROUPS_TO_COMPARE` (detailed) or `FEATURE_SETS` (simple): predictor groups to compare.
 - `CUTOFF_DATE` and `N_VALIDATION_SPLITS`: keep consistent across models.
 
@@ -23,8 +23,9 @@ Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this
 |---|---|
 | [Simple model](simple_model.ipynb) | Ten predictors and linear regression; optional small feature comparisons. |
 | [Linear model](linear_model.ipynb) | Linear regression with the larger feature set. |
-| [Ridge](ridge_model.ipynb) | Linear regression with coefficient shrinkage. |
+| [Ridge](ridge_model.ipynb) | Coefficient shrinkage, with optional quadratic numeric features. |
 | [Support Vector Regression](support_vector.ipynb) | Nonlinear relationships between features and ratings. |
+| [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
 | [Random Forest](random_forest.ipynb) | An average of many decision trees. |
 | [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
 
@@ -47,8 +48,9 @@ All rows use the same **3,871 later movies**. Detailed-model rows show the valid
 | Training-mean baseline | 0.612 | 0.775 | −0.073 |
 | Simple linear, ten predictors | 0.551 | 0.704 | 0.113 |
 | Detailed linear | 0.553 | 0.696 | 0.133 |
-| Ridge | 0.552 | 0.695 | 0.137 |
+| Ridge, tuned quadratic features | 0.498 | 0.637 | 0.275 |
 | Support Vector Regression | 0.475 | 0.606 | 0.343 |
+| KNN + PCA | 0.537 | 0.685 | 0.161 |
 | Random Forest | 0.511 | 0.648 | 0.248 |
 | Gradient Boosting | 0.504 | 0.640 | 0.267 |
 
@@ -59,7 +61,7 @@ All models now include `log_budget`. Unknown budgets are median-imputed inside t
 | Detailed-notebook section | Purpose |
 |---|---|
 | 4 | Run the search using the top `PARAM_GRID` and `TUNING_METRIC`; default selection is validation MAE. Ordinary linear regression has no regularization setting to tune. |
-| 4b | Compare feature groups using training-period validation. |
+| 4b | Compare feature groups using training-period validation; linear/ridge jointly compare every configured setting. |
 | 5–6 | Compare baseline/original/selected results and inspect prediction errors. |
 | 7–8 | Compare feature groups and isolate the effect of earlier director ratings. |
 
@@ -70,3 +72,20 @@ The simple notebook has four baseline sections and an optional feature compariso
 Training ends before **November 18, 2017**: 9,405 training movies and 3,871 test movies. Preprocessing is fitted within training. Current `vote_average` is the target, never an input.
 
 Earlier ratings are observed snapshots, not a complete director filmography or verified historical release-time ratings. Early actor-history coverage is incomplete and flagged. History updates through time, so these are rolling predictions. The expanded test population and repeated inspection mean the results remain exploratory; do not compare them directly with old scores on only financially eligible movies.
+
+For KNN + PCA, edit `PCA_SETTINGS` and `PARAM_GRID` near the top. Section 7 shows retained components and a fixed-settings validation comparison against KNN without PCA. No CSVs are changed.
+
+KNN + PCA selected 35 distance-weighted neighbors and 95% retained input variance (42 components). Its test MAE is higher than SVR. At fixed original settings, PCA slightly worsened validation MAE: 0.554 without PCA versus 0.558 with PCA.
+
+## Linear and ridge tuning results
+
+Both notebooks now search numeric degree 1/2 and missing-value indicators; ridge also searches `alpha` from 0.01 to 10,000. Each candidate refits all preprocessing inside three chronological validation folds. Section 4b jointly ranks settings and feature groups by validation MAE. Ordinary linear regression has no shrinkage parameter; degree 2 changes the feature representation. See [scikit-learn's explanation](https://scikit-learn.org/stable/modules/linear_model.html#polynomial-regression-extending-linear-models-with-basis-functions).
+
+| Model | Test MAE before → after | New RMSE | New R² | Goals met |
+|---|---:|---:|---:|---|
+| Linear | 0.553 → 0.553 | 0.696 | 0.133 | None |
+| Ridge | 0.552 → 0.498 | 0.637 | 0.275 | MAE ≤0.50; RMSE ≤0.65 |
+
+Linear retained original settings and movie/director features. Ridge selected **alpha=100**, **quadratic numeric features**, **no missingness indicators**, and movie/director/actor features (38 source predictors, 130 encoded/expanded inputs). The original plain fits remain visible as baselines.
+
+Ridge has not reached R² ≥0.30 or either stretch goal. Its mean validation MAE improved only slightly (0.5175 for the original degree-1 ridge/director candidate versus 0.5169 selected), so the test gain needs confirmation on a new period. Test rows were not used for selection; no additional search was launched after seeing their scores. Dataset CSVs and the date cutoff are unchanged. Section 5 now displays an explicit goal checklist.

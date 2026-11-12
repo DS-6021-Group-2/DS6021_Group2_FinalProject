@@ -24,6 +24,7 @@ Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this
 |---|---|
 | [Simple model](simple_model.ipynb) | Ten-predictor logistic baseline, then small feature/threshold comparisons. |
 | [Logistic regression](logistic_regression.ipynb) | A regularized linear classifier. |
+| [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
 | [Random Forest](random_forest.ipynb) | Many decision trees combined. |
 | [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
 
@@ -43,13 +44,14 @@ F1 itself does not emphasize precision; the separate 70% requirement does. Alway
 
 ## Current test results
 
-All four candidates met the **validation** precision requirement. The table shows their performance on **1,384 later test movies**; reaching 70% in validation does not guarantee 70% in testing. The simple row uses its Section 5 selection, not its original fixed-threshold baseline.
+All five candidates met the **validation** precision requirement. The table shows their performance on **1,384 later test movies**; reaching 70% in validation does not guarantee 70% in testing. The simple row uses its Section 5 selection, not its original fixed-threshold baseline.
 
 | Model | Hit threshold | Test precision | Test recall | Test hit F1 |
 |---|---:|---:|---:|---:|
 | Logistic regression | 0.65 | 64.8% | 26.7% | 0.379 |
 | Random Forest | 0.55 | 60.3% | 27.8% | 0.380 |
 | Gradient Boosting | 0.60 | 55.4% | 29.1% | 0.381 |
+| KNN + PCA | 0.65 | 52.4% | 16.0% | 0.245 |
 | Simple model | 0.65 | 63.9% | 19.4% | 0.297 |
 
 **Budget update:** all models now include `log_budget`. After rerunning the same validation procedure, logistic test hit F1 rose from 0.200 to 0.379, gradient boosting from 0.314 to 0.381, and simple logistic from 0.224 to 0.297; random forest fell from 0.414 to 0.380. Selection can change settings, features, and thresholds, so these are comparisons of the full procedures. At fixed original settings and threshold 0.5, adding budget increased logistic F1 from 0.500 to 0.531. None of the selected models reached 70% precision on the later test data.
@@ -70,3 +72,7 @@ The simple notebook keeps its original baseline in Sections 1–4 and tries smal
 Train before **November 18, 2017** (5,535 movies); test on or after it (1,384 movies). Select settings/features/thresholds using three chronological validation splits inside training, with training-only preprocessing.
 
 Exclude both `success` and `vote_average`, movie identifiers, raw budget, and revenue from predictors. Earlier histories are incomplete and retrospective. The 70% guard applies to the mean across validation periods, not each period or future movies. Repeated inspection makes these exploratory results, not a future precision guarantee.
+
+For KNN + PCA, edit `PCA_SETTINGS` and `PARAM_GRID` near the top. Section 7 shows retained components and a fixed-settings validation comparison against KNN without PCA. No CSVs are changed.
+
+KNN + PCA selected 15 distance-weighted neighbors and 95% retained input variance (42 components). It met 71.3% mean validation precision, but reached only 52.4% test precision. Its F1 trails the other models. At fixed original settings, PCA slightly worsened validation F1: 0.254 without PCA versus 0.249 with PCA.
