@@ -11,7 +11,7 @@ The datasets are already saved. Start with a simple model; collection notebooks 
 
 | I want to… | Open |
 |---|---|
-| Preview the app layout | [App guide](app/README.md) |
+| Run the prediction app | [App guide](app/README.md) |
 | Predict viewer ratings | [Simple rating model](Modeling_scripts/rating_models/simple_model.ipynb) |
 | Predict hits and busts | [Simple success model](Modeling_scripts/success_models/simple_model.ipynb) |
 | Compare the other models | [Modeling guide](Modeling_scripts/README.md) |
@@ -27,7 +27,7 @@ Use the **`ds6001` Python kernel** and run notebooks from their own folders, fro
 |---|---|
 | [Collection and cleaning](collecting_and_cleaning_data_scripts/README.md) | Get the source data, join movies to directors, and prepare financial labels. |
 | [Feature engineering](Feature_engineering_scripts/README.md) | Build the two model datasets. |
-| [App](app/README.md) | Three-tab Streamlit layout; live prediction models are not connected yet. |
+| [App](app/README.md) | Live ridge/logistic predictions, all-model comparisons, and project context. |
 | [Modeling](Modeling_scripts/README.md) | Separate rating regressors and hit/bust classifiers. |
 | [Visualizations](Data_visualization/README.md) | Compare all model results and inspect prediction errors. |
 | [Data](data/README.md) | Saved source files and model inputs. |

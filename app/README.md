@@ -1,35 +1,52 @@
 # Movie Potential app
 
-A three-tab Streamlit layout for the DS 6021 movie project. Run from the repository root:
+Live ridge rating predictions, logistic hit/bust predictions, all-model comparisons, and project context. Run from the repository root:
 
 ```bash
-/opt/miniconda3/envs/ds6001/bin/python -m pip install -r requirements.txt
+/opt/miniconda3/envs/ds6001/bin/python -m pip install -r app/requirements.txt
 /opt/miniconda3/envs/ds6001/bin/python -m streamlit run app/app.py
 ```
 
-Open the local URL printed in the terminal. Paths are resolved relative to the project, so launching from another folder with the full app path also works.
+## How it works
 
-## Working now
+Select a later-test movie and click **Predict**. The app loads saved fitted pipelines, uses only their predictor columns, and applies the selected logistic **0.65 threshold**. Toggle actual results to compare. Movies outside the financial cohort receive a rating prediction but financial prediction/outcome is unavailable; they are not labeled as busts. Training movies are excluded from the demo.
 
-- **Movie Predictions:** searchable movie selection and real movie details. The actual-results toggle reads saved ratings and financial labels; movies outside the financial cohort show “Unavailable.”
-- **Model Comparison:** every notebook in both model folders is discovered, including SVR and KNN/PCA. Tables and charts show Original, Settings tuned, and Validation-selected scores where available. The simple models do not have a settings-only version.
-- **About the Project:** sources, histories, target definitions, chronological evaluation, and limitations.
+Ridge uses quadratic numeric terms, alpha 100, and movie/director/actor features. Logistic uses its original estimator settings and selected movie/director features. Preprocessing is saved inside each fitted pipeline. No training or model search happens when the app opens. Probabilities are model estimates, not calibrated guarantees.
 
-## Still to connect
+## Models and comparisons
 
-The Predict button deliberately reports that models are not integrated. Prediction cards show dashes, not simulated scores. Next stage: connect saved fitted **tuned ridge** and **logistic regression** pipelines, use the validated feature schemas and selected success threshold, and limit prediction-versus-actual demonstrations to the applicable test movies. Historical results are not presented as new predictions.
+`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 12 implemented model notebooks. The loader checks artifact hashes, dataset/code hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
 
-## Saved results
+Comparisons prefer current local `Data_visualization/results/` reports and fall back to packaged metrics when those ignored files are absent on a fresh clone. Both sources require matching dataset/code/writer hashes. Stale results are marked unavailable. Charts keep evaluation cohorts separate. CSVs and source notebooks are read-only inputs.
 
-The app uses `Data_visualization/results/{rating,success}/*.json` through the existing report validator. Reports must match the current model code, dataset, and report writer. Missing/stale reports produce an unavailable status; no scores are invented or read from stale notebook output. The reports folder is currently ignored by Git, so a fresh clone may show unavailable results until the model owners supply current reports. Creating distributable report snapshots is a later integration task; this layout does not retrain models.
+## Rebuild artifacts offline
 
-Comparisons are separated by dataset/date split/test movies and outcomes. Versions are selected using validation; displayed charts use the later test period. Unknown finances are never assigned a bust label. All dataset access is read-only. The app makes no data API calls and never writes predictions, trains models, or modifies CSVs.
+Only needed after changing model code, selection, or datasets. First ensure all model owners have current notebook reports, then run from the repository root with full project dependencies installed:
 
-## Files
+```bash
+/opt/miniconda3/envs/ds6001/bin/python app/export_models.py
+```
 
-- `app.py`: interface, navigation, and cached read-only views.
-- `model_utils.py`: movie catalog and verified result loading; no fitted models yet.
+This reruns the two notebooks' existing training/selection cells in memory, fits only earlier training rows, and refuses to export unless every held-out prediction matches the notebook's saved report. It also packages comparison metrics. It does not rewrite notebooks or CSVs. Commit updated artifacts together with their matching source code/data.
 
-## AI assistance and verification
+## Deploy to Streamlit Community Cloud
 
-This layout and loader were AI-assisted. Verified using Streamlit AppTest: three-tab rendering, movie selection, Predict placeholder behavior, real actual outcomes, unavailable financial labels, chart/version controls, and missing-report fallback. Checked report metrics against saved sources and SHA-256 hashes of all dataset CSVs before/after. No commit, push, or deployment was performed.
+Use the connected account and these settings after the changes are on GitHub:
+
+- Repository: `DS-6021-Group-2/DS6021_Group2_FinalProject`
+- Branch: **Walt**
+- Main file: **app/app.py**
+- Python: **3.14**, matching ds6001; confirm the platform offers it.
+- Dependencies: `app/requirements.txt` (matching pinned model-library versions).
+- No secrets or `.env` values are required by the app.
+
+Do not retrain models on startup. If Python 3.14 or the pinned dependencies are unavailable on the platform, stop and choose a compatible hosting environment rather than silently loading models under different library versions. This repository does not contain a public deployment URL until publishing succeeds.
+
+## Files and verification
+
+- `app.py`: UI and cached prediction calls.
+- `model_utils.py`: read-only data, validated models, and predictions.
+- `export_models.py`: explicit offline build, never imported by the app.
+- `artifacts/`: portable models and verified comparison scores.
+
+AI-assisted implementation. Tests compared all **3,871 ridge predictions** and **1,384 logistic probabilities/labels** with the notebooks after serialization/reload. Streamlit AppTest verified live Predict, selection reset, actual outcomes, missing financial data, training exclusion, and portable comparison loading without local reports. Dataset SHA-256 hashes stayed unchanged. Browser-based visual verification could not complete because browser access was unavailable.

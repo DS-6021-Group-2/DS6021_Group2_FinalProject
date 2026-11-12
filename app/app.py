@@ -7,7 +7,7 @@ import streamlit as st
 
 # Also supports Streamlit AppTest when invoked from the repository root.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from model_utils import ROOT, load_movie_catalog, load_comparisons
+from model_utils import ROOT, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
 
 st.set_page_config(page_title='Movie Potential | DS 6021', page_icon='🎬', layout='wide')
 st.markdown('''<style>
@@ -27,6 +27,7 @@ button[data-baseweb="tab"] {font-weight:600;}
 def input_signature():
     paths = [ROOT / 'data/model_data_rating.csv', ROOT / 'data/model_data_success.csv',
              ROOT / 'Data_visualization/model_reports.py']
+    paths += list((ROOT / 'app/artifacts').glob('*'))
     paths += list((ROOT / 'Modeling_scripts').glob('*/*.ipynb'))
     paths += list((ROOT / 'Data_visualization/results').glob('*/*.json'))
     return tuple((str(p), p.stat().st_mtime_ns, p.stat().st_size) for p in sorted(paths) if p.exists())
@@ -41,44 +42,62 @@ except (OSError, ValueError, AssertionError, KeyError) as exc:
     st.error(f'Project data could not be loaded ({type(exc).__name__}). Check the saved model CSVs and app README.')
     st.stop()
 
+@st.cache_resource(show_spinner=False)
+def read_models(signature):
+    return load_prediction_models()
+
 with st.sidebar:
     st.title('Movie Potential')
     st.caption('A movie prediction research project')
-    st.info('Layout preview · prediction models are not connected yet.')
-    st.markdown('**Planned prediction models**\n\nRatings → tuned ridge regression\n\nHit / bust → logistic regression')
-    st.caption('Saved comparison results are real. Blank prediction cards are not model outputs.')
+    st.success('Live model predictions · later-test movies only.')
+    st.markdown('**Prediction models**\n\nRatings → tuned ridge regression\n\nHit / bust → logistic regression')
+    st.caption('Models are fitted offline. Opening the app never trains them.')
 
 summary = st.columns(3)
-summary[0].metric('Rated movies', f'{len(catalog):,}')
-summary[1].metric('Finance-eligible movies', f'{catalog.success.notna().sum():,}')
+summary[0].metric('Rated test movies', f'{len(catalog):,}')
+summary[1].metric('Finance-eligible test movies', f'{catalog.success.notna().sum():,}')
 summary[2].metric('Models in comparison', str(len(statuses)))
 predict_tab, compare_tab, about_tab = st.tabs(['Movie Predictions', 'Model Comparison', 'About the Project'])
 
 with predict_tab:
     st.subheader('Explore a movie')
-    st.caption('Search by title or TMDB ID. This first-stage preview shows movie details and actual outcomes; live predictions come next.')
+    st.caption('Search by title or TMDB ID. Choose a held-out movie to generate real model predictions, then reveal its actual outcomes.')
     labels = catalog.set_index('tmdb_id')['label'].to_dict()
     movie_id = st.selectbox('Choose a movie', options=catalog.tmdb_id.tolist(),
                             format_func=labels.get, index=None, placeholder='Start typing a movie title…', key='movie')
     clicked = st.button('Predict', type='primary', disabled=movie_id is None)
     if clicked:
-        st.session_state['requested_movie'] = movie_id
+        try:
+            with st.spinner('Generating predictions…'):
+                prediction = predict_movie(movie_id, read_models(input_signature()))
+            st.session_state['movie_prediction'] = (movie_id, input_signature(), prediction)
+        except (OSError, ValueError, KeyError, AssertionError) as exc:
+            st.session_state.pop('movie_prediction', None)
+            st.error(f'Predictions unavailable: {exc}')
+    stored = st.session_state.get('movie_prediction')
+    prediction = stored[2] if stored and stored[0] == movie_id and stored[1] == input_signature() else None
     if movie_id is not None:
         movie = catalog.loc[catalog.tmdb_id.eq(movie_id)].iloc[0]
         st.subheader(movie.title_tmdb)
         runtime = f'{movie.runtime:g} min' if pd.notna(movie.runtime) else 'Runtime unavailable'
         st.caption(f"Released {movie.release_date:%B %d, %Y} · {runtime}")
-        if st.session_state.get('requested_movie') == movie_id:
-            st.info('Prediction requested. Tuned ridge and logistic regression still need to be connected; no prediction has been generated.')
+
     left, right = st.columns(2)
     with left, st.container(border=True):
         st.caption('VIEWER RESPONSE')
-        st.metric('Predicted viewer rating', '—')
-        st.caption('0–10 scale · Tuned ridge regression · Awaiting model integration')
+        st.metric('Predicted viewer rating', f"{prediction['rating']['rating']:.2f} / 10" if prediction else '—')
+        st.caption('Tuned ridge · Quadratic features · Alpha 100')
     with right, st.container(border=True):
         st.caption('BOX-OFFICE PERFORMANCE')
-        st.metric('Estimated hit probability', '—')
-        st.caption('Hit / bust prediction: unavailable · Logistic regression · Awaiting model integration')
+        financial = prediction.get('success') if prediction else None
+        st.metric('Estimated hit probability', f"{financial['probability']:.1%}" if financial and 'probability' in financial else '—')
+        if financial and 'probability' in financial:
+            st.markdown(f"**Predicted outcome: {financial['label']}**")
+            st.caption(f"Logistic regression · Hit threshold {financial['threshold']:.0%}. Model probabilities are not guarantees.")
+        elif financial:
+            st.caption(financial['unavailable'])
+        else:
+            st.caption('Logistic regression · Select a movie and click Predict.')
     show_actual = st.toggle('Show actual results', key='show_actual')
     if show_actual and movie_id is None:
         st.info('Choose a movie to view its actual outcomes.')
@@ -159,5 +178,5 @@ with about_tab:
 - Earlier histories update through time: this is rolling evaluation, not one frozen forecast at the split date.
 - Repeated test inspection makes findings exploratory. Model scores and hit likelihoods are not guarantees.
 - PCA was tested with KNN; clustering is not implemented in this layout.
-- This preview has no fitted prediction models connected. Comparison scores come from verified saved reports.''')
+- Predictions use saved ridge and logistic pipelines fitted only on earlier training movies. The demo includes later-test movies only; financial predictions are unavailable outside the eligible financial cohort.''')
     st.caption('DS 6021 · Group 2 · AI-assisted app layout; implementation and verification notes are in app/README.md.')
