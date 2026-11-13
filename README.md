@@ -7,13 +7,13 @@ We predict two things from movie characteristics and earlier film history:
 
 ## Start here
 
-The datasets are already saved. Start with a simple model; collection notebooks are only needed when rebuilding the data.
+The datasets are already saved. Start with linear or logistic regression; collection notebooks are only needed when rebuilding the data.
 
 | I want to… | Open |
 |---|---|
 | Run the prediction app | [App guide](app/README.md) |
-| Predict viewer ratings | [Simple rating model](Modeling_scripts/rating_models/simple_model.ipynb) |
-| Predict hits and busts | [Simple success model](Modeling_scripts/success_models/simple_model.ipynb) |
+| Predict viewer ratings | [Linear rating model](Modeling_scripts/rating_models/linear_model.ipynb) |
+| Predict hits and busts | [Logistic success model](Modeling_scripts/success_models/logistic_regression.ipynb) |
 | Compare the other models | [Modeling guide](Modeling_scripts/README.md) |
 | Understand the datasets or variables | [Dataset guide](data/README.md) · [Codebook](CODEBOOK.md) |
 

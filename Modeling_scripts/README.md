@@ -4,15 +4,14 @@ There are **two different prediction tasks**. Choose the folder that matches you
 
 | Task | Target | Dataset | Start with |
 |---|---|---|---|
-| Predict a viewer rating | `vote_average` | `model_data_rating.csv` — 13,276 movies | [Simple rating model](rating_models/simple_model.ipynb) |
-| Predict hit or bust | `success` (1 or 0) | `model_data_success.csv` — 6,919 movies | [Simple success model](success_models/simple_model.ipynb) |
+| Predict a viewer rating | `vote_average` | `model_data_rating.csv` — 13,276 movies | [Linear regression](rating_models/linear_model.ipynb) |
+| Predict hit or bust | `success` (1 or 0) | `model_data_success.csv` — 6,919 movies | [Logistic regression](success_models/logistic_regression.ipynb) |
 
 Use **`ds6001`**, run each notebook from its own subfolder, and run cells from top to bottom. Model notebooks read the saved data; they do not overwrite CSVs.
 
-## Simple or detailed?
+## Model workflow
 
-- **Simple notebooks:** start with ten predictors and a fixed linear/logistic model. An optional section tries a few small feature sets.
-- **Detailed notebooks:** compare more predictors, tune model settings, and inspect prediction errors. Success notebooks also test decision thresholds.
+Each notebook compares feature groups, tunes settings, and inspects prediction errors. Success models also compare decision thresholds. Mean-rating and majority-class baselines remain part of evaluation.
 
 See the [rating guide](rating_models/README.md) or [success guide](success_models/README.md) for notebook lists and results.
 

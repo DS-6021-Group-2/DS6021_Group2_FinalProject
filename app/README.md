@@ -15,7 +15,7 @@ Ridge uses quadratic numeric terms, alpha 100, and movie/director/actor features
 
 ## Models and comparisons
 
-`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 12 implemented model notebooks. The loader checks artifact hashes, dataset/code hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
+`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 11 implemented model notebooks. The loader checks artifact hashes, dataset/code hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
 
 Comparisons prefer current local `Data_visualization/results/` reports and fall back to packaged metrics when those ignored files are absent on a fresh clone. Both sources require matching dataset/code/writer hashes. Stale results are marked unavailable. Charts keep evaluation cohorts separate. CSVs and source notebooks are read-only inputs.
 

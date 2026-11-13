@@ -11,8 +11,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 LABELS = {
-    'simple_model': 'Simple model', 'linear_model': 'Linear regression',
-    'ridge_model': 'Ridge regression', 'support_vector': 'Support Vector Regression',
+    'linear_model': 'Linear regression',
+    'lasso_model': 'Lasso regression', 'elastic_net_model': 'Elastic net regression',
+    'ridge_model': 'Ridge regression',
     'random_forest': 'Random Forest', 'gradient_boosting': 'Gradient Boosting',
     'knn_pca': 'KNN + PCA', 'logistic_regression': 'Logistic regression',
 }

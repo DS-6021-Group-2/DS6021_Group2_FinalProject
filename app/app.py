@@ -112,7 +112,7 @@ with predict_tab:
 
 with compare_tab:
     st.subheader('How do the models compare?')
-    st.write('Explore every implemented model, including SVR and KNN with PCA. These are saved later-test scores, not live predictions.')
+    st.write('Explore every implemented model, including KNN with PCA. These are saved later-test scores, not live predictions.')
     st.info('Compare models only on matching datasets and test periods. Each chart below is restricted to one verified evaluation cohort. Validation selects settings; later-test scores describe performance.')
     for task, title in [('rating', 'Viewer rating models'), ('success', 'Financial success models')]:
         st.markdown(f'### {title}')
@@ -143,7 +143,7 @@ with compare_tab:
             metric = st.selectbox('Chart metric', metrics, key=f'{task}_metric', format_func=lambda x: 'R²' if x == 'R2' else x)
             chart = filtered.pivot(index='Model', columns='Version', values=metric)
             st.bar_chart(chart, horizontal=True, x_label=metric, y_label='Model')
-        st.caption('Original = fixed baseline; Settings tuned = search on all features; Validation-selected = final feature/settings selection (and threshold for success). The simple models have no separate settings-only version.')
+        st.caption('Original = fixed baseline; Settings tuned = search on all features; Validation-selected = final feature/settings selection (and threshold for success).')
         if not unavailable.empty:
             st.warning('Some models have unavailable results; they remain listed here.')
             st.dataframe(unavailable[['Model', 'Status']], hide_index=True, width='stretch')
