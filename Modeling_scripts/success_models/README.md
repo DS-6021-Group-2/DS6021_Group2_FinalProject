@@ -9,8 +9,8 @@
 Every notebook now starts with **Tuning controls — edit here first**. Change that one settings cell, save, and **Run All**. Later validation sections read those controls instead of resetting them.
 
 - `MODEL_SETTINGS`: the original estimator and settings not searched.
-- `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search. OLS has an empty grid.
-- `FEATURE_GROUPS_TO_COMPARE` (detailed) or `FEATURE_SETS` (simple): predictor groups to compare.
+- `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search.
+- `FEATURE_GROUPS_TO_COMPARE`: predictor groups to compare.
 - `MIN_VALIDATION_PRECISION` and `THRESHOLDS`: the precision goal and threshold candidates.
 - `CUTOFF_DATE` and `N_VALIDATION_SPLITS`: keep consistent across models.
 
@@ -18,11 +18,10 @@ The last cell saves a checked report for the [visualization notebook](../../Data
 
 ## What to run
 
-Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this folder, and run cells from top to bottom.
+Start with [logistic_regression.ipynb](logistic_regression.ipynb). Use `ds6001`, run from this folder, and run cells from top to bottom.
 
 | Notebook | What it tries |
 |---|---|
-| [Simple model](simple_model.ipynb) | Ten-predictor logistic baseline, then small feature/threshold comparisons. |
 | [Logistic regression](logistic_regression.ipynb) | A regularized linear classifier. |
 | [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
 | [Random Forest](random_forest.ipynb) | Many decision trees combined. |
@@ -44,7 +43,7 @@ F1 itself does not emphasize precision; the separate 70% requirement does. Alway
 
 ## Current test results
 
-All five candidates met the **validation** precision requirement. The table shows their performance on **1,384 later test movies**; reaching 70% in validation does not guarantee 70% in testing. The simple row uses its Section 5 selection, not its original fixed-threshold baseline.
+All four candidates met the **validation** precision requirement. The table shows their performance on **1,384 later test movies**; reaching 70% in validation does not guarantee 70% in testing.
 
 | Model | Hit threshold | Test precision | Test recall | Test hit F1 |
 |---|---:|---:|---:|---:|
@@ -52,9 +51,8 @@ All five candidates met the **validation** precision requirement. The table show
 | Random Forest | 0.55 | 60.3% | 27.8% | 0.380 |
 | Gradient Boosting | 0.60 | 55.4% | 29.1% | 0.381 |
 | KNN + PCA | 0.65 | 52.4% | 16.0% | 0.245 |
-| Simple model | 0.65 | 63.9% | 19.4% | 0.297 |
 
-**Budget update:** all models now include `log_budget`. After rerunning the same validation procedure, logistic test hit F1 rose from 0.200 to 0.379, gradient boosting from 0.314 to 0.381, and simple logistic from 0.224 to 0.297; random forest fell from 0.414 to 0.380. Selection can change settings, features, and thresholds, so these are comparisons of the full procedures. At fixed original settings and threshold 0.5, adding budget increased logistic F1 from 0.500 to 0.531. None of the selected models reached 70% precision on the later test data.
+**Budget update:** all models now include `log_budget`. After rerunning the same validation procedure, logistic test hit F1 rose from 0.200 to 0.379, gradient boosting from 0.314 to 0.381; random forest fell from 0.414 to 0.380. Selection can change settings, features, and thresholds, so these are comparisons of the full procedures. At fixed original settings and threshold 0.5, adding budget increased logistic F1 from 0.500 to 0.531. None of the selected models reached 70% precision on the later test data.
 
 ## Finding things in the notebooks
 
@@ -65,7 +63,7 @@ All five candidates met the **validation** precision requirement. The table show
 | 5–6 | Read original/selected results, confusion matrices, and prediction examples. |
 | 7 | Compare feature groups at the original settings. |
 
-The simple notebook keeps its original baseline in Sections 1–4 and tries small presets/thresholds in Section 5. If no candidate meets 70% validation precision, notebooks report that and keep a clearly labeled original reference; they do not quietly lower the target.
+If no candidate meets 70% validation precision, notebooks report that and keep a clearly labeled original reference; they do not quietly lower the target.
 
 ## Keep in mind
 

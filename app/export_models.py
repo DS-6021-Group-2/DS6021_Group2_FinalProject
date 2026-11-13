@@ -88,7 +88,7 @@ def export():
     (ARTIFACTS / 'comparisons.json').write_text(json.dumps(packaged, indent=2) + '\n')
     (ARTIFACTS / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     assert all(reports.file_hash(p) == h for p, h in before.items())
-    print('All 12 comparison reports packaged. All CSVs unchanged.', flush=True)
+    print(f'{len(packaged)} comparison reports packaged. All CSVs unchanged.', flush=True)
 
 
 if __name__ == '__main__':

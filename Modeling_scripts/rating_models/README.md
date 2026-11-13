@@ -10,21 +10,21 @@ Every notebook now starts with **Tuning controls — edit here first**. Change t
 
 - `MODEL_SETTINGS`: the original estimator and settings not searched.
 - `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search. OLS searches preprocessing choices; ridge also searches `alpha`.
-- `FEATURE_GROUPS_TO_COMPARE` (detailed) or `FEATURE_SETS` (simple): predictor groups to compare.
+- `FEATURE_GROUPS_TO_COMPARE`: predictor groups to compare.
 - `CUTOFF_DATE` and `N_VALIDATION_SPLITS`: keep consistent across models.
 
 The last cell saves a checked report for the [visualization notebook](../../Data_visualization/model_visualizations.ipynb). See its [guide](../../Data_visualization/README.md) for refreshing graphs.
 
 ## What to run
 
-Start with [simple_model.ipynb](simple_model.ipynb). Use `ds6001`, run from this folder, and run cells from top to bottom.
+Start with [linear_model.ipynb](linear_model.ipynb). Use `ds6001`, run from this folder, and run cells from top to bottom.
 
 | Notebook | What it tries |
 |---|---|
-| [Simple model](simple_model.ipynb) | Ten predictors and linear regression; optional small feature comparisons. |
 | [Linear model](linear_model.ipynb) | Linear regression with the larger feature set. |
 | [Ridge](ridge_model.ipynb) | Coefficient shrinkage, with optional quadratic numeric features. |
-| [Support Vector Regression](support_vector.ipynb) | Nonlinear relationships between features and ratings. |
+| [Lasso](lasso_model.ipynb) | L1 shrinkage, optional quadratic terms, and validation-based feature selection. |
+| [Elastic net](elastic_net_model.ipynb) | Combined L1/L2 shrinkage; jointly tunes alpha, mixing weight, degree, and feature groups. |
 | [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
 | [Random Forest](random_forest.ipynb) | An average of many decision trees. |
 | [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
@@ -41,20 +41,20 @@ The baseline predicts **the training mean rating for every movie**. Beat that be
 
 ## Current test results
 
-All rows use the same **3,871 later movies**. Detailed-model rows show the validation-selected model; the simple row below shows its original fixed ten-predictor baseline.
+All rows use the same **3,871 later movies**. Model rows show the validation-selected model.
 
 | Model | MAE ↓ | RMSE ↓ | R² ↑ |
 |---|---:|---:|---:|
 | Training-mean baseline | 0.612 | 0.775 | −0.073 |
-| Simple linear, ten predictors | 0.551 | 0.704 | 0.113 |
 | Detailed linear | 0.553 | 0.696 | 0.133 |
 | Ridge, tuned quadratic features | 0.498 | 0.637 | 0.275 |
-| Support Vector Regression | 0.475 | 0.606 | 0.343 |
+| Lasso, tuned quadratic features | 0.494 | 0.631 | 0.289 |
+| Elastic net, tuned quadratic features | 0.495 | 0.632 | 0.286 |
 | KNN + PCA | 0.537 | 0.685 | 0.161 |
 | Random Forest | 0.511 | 0.648 | 0.248 |
 | Gradient Boosting | 0.504 | 0.640 | 0.267 |
 
-All models now include `log_budget`. Unknown budgets are median-imputed inside training only. Adding budget produced small, mixed rating changes on the same test movies; it did not consistently improve prediction. The simple notebook also shows its optional validation-selected preset separately. Results remain exploratory.
+All models now include `log_budget`. Unknown budgets are median-imputed inside training only. Adding budget produced small, mixed rating changes on the same test movies; it did not consistently improve prediction. Results remain exploratory.
 
 ## Finding things in the notebooks
 
@@ -65,7 +65,6 @@ All models now include `log_budget`. Unknown budgets are median-imputed inside t
 | 5–6 | Compare baseline/original/selected results and inspect prediction errors. |
 | 7–8 | Compare feature groups and isolate the effect of earlier director ratings. |
 
-The simple notebook has four baseline sections and an optional feature comparison in Section 5.
 
 ## Keep in mind
 
@@ -75,7 +74,7 @@ Earlier ratings are observed snapshots, not a complete director filmography or v
 
 For KNN + PCA, edit `PCA_SETTINGS` and `PARAM_GRID` near the top. Section 7 shows retained components and a fixed-settings validation comparison against KNN without PCA. No CSVs are changed.
 
-KNN + PCA selected 35 distance-weighted neighbors and 95% retained input variance (42 components). Its test MAE is higher than SVR. At fixed original settings, PCA slightly worsened validation MAE: 0.554 without PCA versus 0.558 with PCA.
+KNN + PCA selected 35 distance-weighted neighbors and 95% retained input variance (42 components). Its test MAE is higher than tuned ridge. At fixed original settings, PCA slightly worsened validation MAE: 0.554 without PCA versus 0.558 with PCA.
 
 ## Linear and ridge tuning results
 
@@ -89,3 +88,18 @@ Both notebooks now search numeric degree 1/2 and missing-value indicators; ridge
 Linear retained original settings and movie/director features. Ridge selected **alpha=100**, **quadratic numeric features**, **no missingness indicators**, and movie/director/actor features (38 source predictors, 130 encoded/expanded inputs). The original plain fits remain visible as baselines.
 
 Ridge has not reached R² ≥0.30 or either stretch goal. Its mean validation MAE improved only slightly (0.5175 for the original degree-1 ridge/director candidate versus 0.5169 selected), so the test gain needs confirmation on a new period. Test rows were not used for selection; no additional search was launched after seeing their scores. Dataset CSVs and the date cutoff are unchanged. Section 5 now displays an explicit goal checklist.
+
+## Lasso and elastic net
+
+[Lasso](lasso_model.ipynb) and [elastic net](elastic_net_model.ipynb) use the same cohort, 2017-11-18 cutoff, three chronological folds, and preprocessing structure as ridge. Both search degree 1/2, alpha `[0.001, 0.003, 0.01, 0.03, 0.1]`, and four feature groups; elastic net additionally searches l1_ratio `[0.05, 0.2, 0.5, 0.8]`. Selection uses validation MAE. Convergence warnings raise errors; each notebook shows coefficients, convergence diagnostics, and verified model comparisons. No success models or dataset CSVs were changed.
+
+Both selected **quadratic numeric features**, **alpha=0.003**, and movie/director/actor features. Elastic net selected **l1_ratio=0.8**. Alpha is defined differently from ridge and should not be compared numerically across these estimators.
+
+| Model | Mean validation MAE | Test MAE | Test RMSE | Test R² |
+|---|---:|---:|---:|---:|
+| Ordinary linear regression | 0.5178 | 0.5527 | 0.6959 | 0.1335 |
+| Ridge | 0.5169 | 0.4979 | 0.6366 | 0.2750 |
+| Lasso | 0.5086 | 0.4943 | 0.6305 | 0.2887 |
+| Elastic net | 0.5093 | 0.4949 | 0.6316 | 0.2864 |
+
+**Finding:** lasso has the lowest recorded test MAE among the retained rating models. Elastic net slightly beats ridge but does not beat lasso. These small differences on an already-inspected period need independent confirmation. Both new models meet MAE ≤0.50 and RMSE ≤0.65, but neither reaches R² ≥0.30. No extra search was launched in response to test scores. The app continues to use its existing verified ridge pipeline; both new models appear in comparisons.
