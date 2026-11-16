@@ -32,6 +32,7 @@ Use the **`ds6001` Python kernel** and run notebooks from their own folders, fro
 | [Modeling](Modeling_scripts/README.md) | Separate rating regressors and three-class financial classifiers. |
 | [Visualizations](Data_visualization/README.md) | Compare all model results and inspect prediction errors. |
 | [Data](data/README.md) | Saved source files and model inputs. |
+| [Tests](tests/README.md) | Optional model and data verification checks. |
 
 Feature engineering produces **`model_data_rating.csv`** (13,276 movies) and **`model_data_success.csv`** (6,919 movies). Each model folder uses its matching dataset.
 

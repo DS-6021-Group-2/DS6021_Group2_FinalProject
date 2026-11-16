@@ -1,5 +1,9 @@
 """Read-only boundary, decision-rule, metric and dataset consistency checks."""
+
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Modeling_scripts"))
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score, precision_score, roc_auc_score

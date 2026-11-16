@@ -1,5 +1,9 @@
 """Check active model/data/app contracts; dated snapshots are historical only."""
+
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Modeling_scripts"))
+
 import argparse
 import json
 import numpy as np

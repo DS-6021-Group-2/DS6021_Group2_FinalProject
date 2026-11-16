@@ -1,4 +1,9 @@
 """Meaningful guard/row-isolation tests; no project datasets are changed."""
+
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Modeling_scripts"))
+
 import numpy as np
 import pandas as pd
 from overlap_review import choose_candidate, review_overlap, RemoveExactRedundancy

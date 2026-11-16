@@ -1,4 +1,9 @@
 """Numerical regression checks for diagnostics; no project datasets are changed."""
+
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Modeling_scripts"))
+
 import numpy as np
 
 from model_diagnostics import collinearity

@@ -42,8 +42,8 @@ Other checks cover IDs, exclusions, date/row separation and chronological folds;
 From the project root:
 
 ```bash
-/opt/miniconda3/envs/ds6001/bin/python Modeling_scripts/verify_diagnostics.py
-/opt/miniconda3/envs/ds6001/bin/python Modeling_scripts/verify_financial_outcomes.py
+/opt/miniconda3/envs/ds6001/bin/python tests/verify_diagnostics.py
+/opt/miniconda3/envs/ds6001/bin/python tests/verify_financial_outcomes.py
 /opt/miniconda3/envs/ds6001/bin/python app/verify_models.py
 ```
 
@@ -70,7 +70,7 @@ Polynomial trials that expand missing-value indicators can create exact aliases 
 
 Diagnostics include **Before / After overlap review** tables with raw/expanded counts, VIF ≥10 counts, maximum VIF, validation scores, and excluded inputs. All candidate fold scores are saved in the ignored model reports. The app comparison includes **Before overlap trim**, preserving the previous selected model separately from the new **Validation-selected** model. Test scores are reported after selection and never choose trims.
 
-Run `/opt/miniconda3/envs/ds6001/bin/python Modeling_scripts/verify_overlap_review.py` to check the tolerances, precision/macro-F1 guards, reference fallback, fold isolation, and exact-alias removal.
+Run `/opt/miniconda3/envs/ds6001/bin/python tests/verify_overlap_review.py` to check the tolerances, precision/macro-F1 guards, reference fallback, fold isolation, and exact-alias removal.
 
 
 ## Current before/after results
