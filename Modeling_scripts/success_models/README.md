@@ -45,16 +45,18 @@ F1 itself does not emphasize precision; the separate 70% requirement does. Alway
 
 All four candidates met their **validation** precision requirement. The table shows their performance on **1,384 later test movies**; meeting a requirement in validation does not guarantee meeting it in testing.
 
-**Logistic regression update (11/15/2026):** the logistic regression notebook now uses 33 predictors from `model_data_success_2026-11-04.csv` with the group's shared **70%** validation precision requirement. Validation selected the "+ Director history" feature group, the initial settings, and a 0.65 cutoff (validation precision 70.2%, recall 12.1%, hit F1 0.205). Every success model will first be built and compared under 70%, and a 65% requirement may then be tested for all of them. The other three rows have not been re-run with these predictor changes, so they should be updated before the models are compared.
+**Logistic regression update (11/15/2026):** the logistic regression notebook now uses 33 predictors from `model_data_success_2026-11-04.csv` with the group's shared **70%** validation precision requirement. Validation selected the "+ Director history" feature group, the initial settings, and a 0.65 cutoff (validation precision 70.2%, recall 12.1%, hit F1 0.205). Every success model will first be built and compared under 70%, and a 65% requirement may then be tested for all of them. The gradient boosting and KNN + PCA rows have not been re-run with these predictor changes, so they should be updated before the models are compared.
+
+**Random forest update (11/16/2026):** the random forest notebook now uses the same data, 33 predictors, pipeline, validation folds, and 70% requirement as the logistic regression notebook, with a 96-combination search over `max_depth`, `min_samples_leaf`, `max_features`, `class_weight`, and `criterion`. Validation selected the "Movie characteristics" feature group, the initial settings (150 trees, `max_depth` = 12, `min_samples_leaf` = 10, no class weighting), and a 0.50 cutoff (validation precision 70.9%, recall 15.0%, hit F1 0.243).
 
 | Model | Hit threshold | Test precision | Test recall | Test hit F1 |
 |---|---:|---:|---:|---:|
 | Logistic regression | 0.65 | 64.6% | 23.8% | 0.348 |
-| Random Forest | 0.55 | 60.3% | 27.8% | 0.380 |
+| Random Forest | 0.50 | 54.1% | 30.3% | 0.389 |
 | Gradient Boosting | 0.60 | 55.4% | 29.1% | 0.381 |
 | KNN + PCA | 0.65 | 52.4% | 16.0% | 0.245 |
 
-Logistic regression also reached a test ROC AUC of 0.695 (0.500 for no skill) and an average precision of 0.548 (0.343 test hit rate). For reference, always predicting hit gives a test hit F1 of 0.511.
+Logistic regression also reached a test ROC AUC of 0.695 (0.500 for no skill) and an average precision of 0.548 (0.343 test hit rate). Random forest reached a test ROC AUC of 0.673 and an average precision of 0.498. For reference, always predicting hit gives a test hit F1 of 0.511.
 
 **Budget update:** all models now include `log_budget`. After rerunning the same validation procedure, logistic test hit F1 rose from 0.200 to 0.379, gradient boosting from 0.314 to 0.381; random forest fell from 0.414 to 0.380. Selection can change settings, features, and thresholds, so these are comparisons of the full procedures. At fixed original settings and threshold 0.5, adding budget increased logistic F1 from 0.500 to 0.531. None of the selected models reached 70% precision on the later test data.
 
