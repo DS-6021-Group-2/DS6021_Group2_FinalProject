@@ -25,7 +25,7 @@ Use `ds6001`, run notebooks from this folder, and Run All. Source/model dataset 
 - `SHOW_DIAGNOSTIC_DETAILS`: False shows interpretations; True adds technical tables.
 - Keep `CUTOFF_DATE` and `N_VALIDATION_SPLITS` consistent across models.
 
-Gradient Boosting includes Merasia's expanded grid behind `USE_MERASIA_SEARCH = True` (432 candidates); the default keeps the existing compact search and current results. `SHOW_FEATURE_IMPORTANCE = True` displays her top-15 transformed-input importance table. These importances describe the fitted model, not causal effects.
+Gradient Boosting uses Merasia's expanded grid (432 candidates), which beat the earlier compact grid on validation MAE (0.487 vs 0.491). The search fits one model at a time, so a full run is slow. `SHOW_FEATURE_IMPORTANCE = True` displays her top-15 transformed-input importance table. These importances describe the fitted model, not causal effects.
 
 Three expanding validation folds remain inside the 9,405-movie training period before **November 18, 2017**. All imputation, encoding, scaling, polynomial expansion, PCA and exact-alias removal are fitted within each training fold. Validation MAE chooses candidates. The later 3,871 test movies never choose features or settings.
 
@@ -41,7 +41,7 @@ These are the overlap-reviewed **Selected** versions. **Before overlap trim** pr
 | Lasso | 0.496 | 0.633 | 0.283 |
 | Elastic net | 0.497 | 0.634 | 0.281 |
 | Random Forest | 0.510 | 0.648 | 0.250 |
-| Gradient Boosting | 0.504 | 0.641 | 0.266 |
+| Gradient Boosting | 0.503 | 0.641 | 0.264 |
 | KNN + PCA | 0.538 | 0.685 | 0.160 |
 | KNN | 0.529 | 0.673 | 0.189 |
 

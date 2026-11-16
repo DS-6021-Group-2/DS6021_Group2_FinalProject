@@ -341,11 +341,11 @@
       "Modeling_scripts/helpers/model_workflow.py": "a6d1c67cfb56c305c6661ba8e3222f3dd788f447880f368cb7119e8326267171",
       "Modeling_scripts/helpers/project_policy.py": "2c701aa227b444c8cb5750f1c9a3d89a43cf5017347df14caf820376d080d5fe"
     },
-    "created_utc": "2026-11-16T14:41:49.936498+00:00",
+    "created_utc": "2026-11-16T22:55:06.752564+00:00",
     "task": "rating",
     "model_key": "gradient_boosting",
     "notebook": "Modeling_scripts/rating_models/gradient_boosting.ipynb",
-    "code_sha256": "e0ba8c1dac8ad971905bea3becf17c1bbe9ec7f0812faee5bc56f389af094f1c",
+    "code_sha256": "0d7c492f696c966116b7c273deb4d00c87a97128b32d5c3ce1b21b1deadfefd0",
     "writer_sha256": "9613456cb95e1f752a25ef181af1b198a1519abfaf5e6a6caaf117a13a114dc9",
     "dataset": "data/model_data_rating.csv",
     "dataset_sha256": "88f7d844340038dcf7e5792f32509a3fc6c6242cf6101ad66561f42bf1ca9aff",
@@ -362,11 +362,30 @@
     "parameter_grid": {
       "regression__n_estimators": [
         100,
-        150
+        200,
+        300,
+        500
+      ],
+      "regression__learning_rate": [
+        0.01,
+        0.03,
+        0.05,
+        0.1
       ],
       "regression__max_depth": [
         2,
-        3
+        3,
+        4
+      ],
+      "regression__min_samples_leaf": [
+        5,
+        10,
+        20
+      ],
+      "regression__subsample": [
+        0.7,
+        0.85,
+        1.0
       ]
     },
     "selection_metric": "MAE",
@@ -483,14 +502,14 @@
           "genre_documentary"
         ],
         "train_metrics": {
-          "MAE": 0.46522344739847354,
-          "RMSE": 0.5989958736457388,
-          "R2": 0.4421595925571389
+          "MAE": 0.45171236741426135,
+          "RMSE": 0.5826391556514612,
+          "R2": 0.4722094095380598
         },
         "test_metrics": {
-          "MAE": 0.5040384514391933,
-          "RMSE": 0.6402746382248808,
-          "R2": 0.26655927591631445
+          "MAE": 0.5003854364736029,
+          "RMSE": 0.635883949640833,
+          "R2": 0.2765839371233333
         },
         "validation": {}
       },
@@ -527,26 +546,22 @@
           "dir_first_film",
           "dir_no_track_record",
           "dir_prior_rating_smoothed",
-          "dir_no_rating_history",
-          "lead_actor_films_5yr_backfilled_log1p",
-          "backfill_unavailable",
-          "company_films_5yr_log1p",
-          "franchise_prior_films_log1p"
+          "dir_no_rating_history"
         ],
         "train_metrics": {
-          "MAE": 0.4648606148978234,
-          "RMSE": 0.598908397255696,
-          "R2": 0.44232251288440405
+          "MAE": 0.45594766019363453,
+          "RMSE": 0.5874400630874549,
+          "R2": 0.46347565650962996
         },
         "test_metrics": {
-          "MAE": 0.5040171011483788,
-          "RMSE": 0.6405687836853643,
-          "R2": 0.26588522824279115
+          "MAE": 0.5033862661409522,
+          "RMSE": 0.6412710423051524,
+          "R2": 0.26427471885445264
         },
         "validation": {
-          "MAE": 0.4906284053649306,
-          "RMSE": 0.6318184667920609,
-          "R2": 0.3846124971263216
+          "MAE": 0.4872181639260617,
+          "RMSE": 0.6279271434573289,
+          "R2": 0.3923556255094763
         }
       },
       "Before overlap trim": {
@@ -587,26 +602,22 @@
           "dir_no_track_record",
           "dir_prior_rating_smoothed",
           "dir_prior_rated_films_log1p",
-          "dir_no_rating_history",
-          "lead_actor_films_5yr_backfilled_log1p",
-          "backfill_unavailable",
-          "company_films_5yr_log1p",
-          "franchise_prior_films_log1p"
+          "dir_no_rating_history"
         ],
         "train_metrics": {
-          "MAE": 0.46522344739847354,
-          "RMSE": 0.5989958736457388,
-          "R2": 0.4421595925571389
+          "MAE": 0.4544596888522964,
+          "RMSE": 0.5858183475283107,
+          "R2": 0.46643387786400536
         },
         "test_metrics": {
-          "MAE": 0.5040384514391933,
-          "RMSE": 0.6402746382248808,
-          "R2": 0.26655927591631445
+          "MAE": 0.5038086103428249,
+          "RMSE": 0.6407689248856301,
+          "R2": 0.26542641860864435
         },
         "validation": {
-          "MAE": 0.48929957869468516,
-          "RMSE": 0.6308300277555651,
-          "R2": 0.3866669159871174
+          "MAE": 0.48636022171911586,
+          "RMSE": 0.6272476916009354,
+          "R2": 0.3936731978728399
         }
       }
     },
@@ -620,41 +631,41 @@
       },
       "comparison": [
         {
-          "Feature set": "All features",
+          "Feature set": "+ Director history",
           "Settings": "Reference",
-          "MAE": 0.489299578695,
-          "RMSE": 0.630830027756,
-          "R2": 0.386666915987,
-          "Score_std": 0.013750906528,
+          "MAE": 0.486360221719,
+          "RMSE": 0.627247691601,
+          "R2": 0.393673197873,
+          "Score_std": 0.011159122445,
           "Trim": "Before overlap trim",
-          "Predictors": 40,
+          "Predictors": 36,
           "Removed": "None",
           "Threshold": null,
           "Threshold distance": 0,
           "Stage": "Before overlap trim",
-          "Transformed inputs": 54.0,
+          "Transformed inputs": 50.0,
           "VIF >=10": 23.0,
-          "Maximum VIF": 666.185339392518
+          "Maximum VIF": 664.62732837005
         },
         {
-          "Feature set": "All features | Lean history + director count",
-          "Settings": "Initial settings",
-          "MAE": 0.490628405365,
-          "RMSE": 0.631818466792,
-          "R2": 0.384612497126,
-          "Score_std": 0.017090193066,
+          "Feature set": "+ Director history | Lean history + director count",
+          "Settings": "Settings selected in 4",
+          "MAE": 0.487218163926,
+          "RMSE": 0.627927143457,
+          "R2": 0.392355625509,
+          "Score_std": 0.011019921832,
           "Trim": "Lean history + director count",
-          "Predictors": 35,
+          "Predictors": 31,
           "Removed": "n_genres, imdb_director_count, dir_years_active_log1p, dir_prior_known_films_log1p, dir_prior_rated_films_log1p",
           "Threshold": null,
           "Threshold distance": 0,
           "Stage": "After overlap review",
-          "Transformed inputs": 49.0,
+          "Transformed inputs": 45.0,
           "VIF >=10": 3.0,
-          "Maximum VIF": 19.332669803806
+          "Maximum VIF": 19.317098185307
         }
       ],
-      "candidate_count": 4
+      "candidate_count": 7
     },
     "cohort_id": "5412058bc997"
   },
@@ -2626,11 +2637,11 @@
       "Modeling_scripts/helpers/model_workflow.py": "a6d1c67cfb56c305c6661ba8e3222f3dd788f447880f368cb7119e8326267171",
       "Modeling_scripts/helpers/project_policy.py": "2c701aa227b444c8cb5750f1c9a3d89a43cf5017347df14caf820376d080d5fe"
     },
-    "created_utc": "2026-11-16T14:43:53.099629+00:00",
+    "created_utc": "2026-11-16T22:49:59.397908+00:00",
     "task": "success",
     "model_key": "gradient_boosting",
     "notebook": "Modeling_scripts/success_models/gradient_boosting.ipynb",
-    "code_sha256": "c970d05621beda2f9d5eb18e053ff484c2b38711569588ecbf87e903dde7b47b",
+    "code_sha256": "dd76411a72dc771da342136dede3e9b69b87267ad606690647348b8b6465e68b",
     "writer_sha256": "9613456cb95e1f752a25ef181af1b198a1519abfaf5e6a6caaf117a13a114dc9",
     "dataset": "data/model_data_success.csv",
     "dataset_sha256": "b7976d8e19bcb0122caab7940e9f4cc8a4149811f2f43c46dd54c894eac8bbd0",

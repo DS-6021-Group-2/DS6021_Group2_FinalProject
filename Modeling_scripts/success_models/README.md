@@ -29,7 +29,7 @@ Use `ds6001`, run from this folder, and Run All. No classifier notebook modifies
 | `THRESHOLDS`, `MIN_VALIDATION_PRECISION` | Candidate hit thresholds and the mean validation hit precision requirement (0.70). |
 | `SHOW_DIAGNOSTIC_DETAILS` | False: plain-English diagnostics; True: all technical tables. |
 
-Gradient Boosting includes Merasia's expanded grid behind `USE_MERASIA_SEARCH = True` (54 candidates); the default keeps the existing compact search. Her older binary results are not reused: this notebook retains all three classes and the shared 70% validation hit-precision goal. Expanded-grid results still need evaluation under this current workflow.
+Gradient Boosting uses a compact grid. Merasia's expanded 54-candidate grid was evaluated under this three-class workflow and the shared 70% validation hit-precision goal, and did not beat the compact grid on validation hit F1. Her older binary results are not reused.
 
 Train before **November 18, 2017** (5,535 movies); test on or after it (1,384). Three expanding chronological folds stay inside training. Preprocessing is fitted anew within each fold. Current ratings/financial labels, IDs, revenue and revenue-to-budget ratio are excluded from predictors; log budget is allowed.
 

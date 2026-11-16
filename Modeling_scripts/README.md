@@ -66,4 +66,4 @@ The shared [director-history experiment](../Data_visualization/history_feature_c
 
 Shared Python code lives in [helpers/](helpers/README.md). Verification scripts live in [tests/](../tests/README.md).
 
-Merasia's expanded gradient-boosting grids are optional in both notebooks (`USE_MERASIA_SEARCH`); existing searches remain the default. Her rating feature-importance view is available with `SHOW_FEATURE_IMPORTANCE`. The merge preserves canonical datasets, three-class labels, shared goals, and the removed legacy models' absence.
+Merasia's expanded gradient-boosting grids were tested in both notebooks. Rating Gradient Boosting uses her 432-candidate grid, which won on validation MAE; success Gradient Boosting keeps the compact grid, which beat her 54-candidate grid on validation hit F1. Her rating feature-importance view is available with `SHOW_FEATURE_IMPORTANCE`. The merge preserves canonical datasets, three-class labels, shared goals, and the removed legacy models' absence.
