@@ -14,6 +14,7 @@ Use `ds6001`, run notebooks from this folder, and Run All. Source/model dataset 
 | [Elastic net](elastic_net_model.ipynb) | Combined L1/L2 shrinkage. |
 | [Random Forest](random_forest.ipynb) | Averaged trees. |
 | [Gradient Boosting](gradient_boosting.ipynb) | Sequential trees that reduce remaining loss. |
+| [KNN](knn.ipynb) | Partner plain KNN, six compact presets plus the common full-feature reference. |
 | [KNN + PCA](knn_pca.ipynb) | Neighbors after standardized dimensionality reduction; includes a no-PCA validation comparison. |
 
 ## Tune near the top
@@ -40,6 +41,7 @@ These are the overlap-reviewed **Selected** versions. **Before overlap trim** pr
 | Random Forest | 0.510 | 0.648 | 0.250 |
 | Gradient Boosting | 0.504 | 0.641 | 0.266 |
 | KNN + PCA | 0.538 | 0.685 | 0.160 |
+| KNN | 0.529 | 0.673 | 0.189 |
 
 ## Overlap review and interpretation
 

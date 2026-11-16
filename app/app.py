@@ -8,7 +8,7 @@ import streamlit as st
 
 # Also supports Streamlit AppTest when invoked from the repository root.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from model_utils import CLASS_LABELS, ROOT, LABELS, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
+from model_utils import CLASS_LABELS, SUCCESS_MIN_VALIDATION_PRECISION, ROOT, LABELS, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
 
 st.set_page_config(page_title='Movie Potential | DS 6021', page_icon='🎬', layout='wide')
 st.markdown('''<style>
@@ -29,7 +29,7 @@ def input_signature():
     paths = [ROOT / 'data/model_data_rating.csv', ROOT / 'data/model_data_success.csv',
              ROOT / 'Data_visualization/model_reports.py', ROOT / 'Modeling_scripts/financial_outcomes.py',
              ROOT / 'Modeling_scripts/model_diagnostics.py', ROOT / 'Modeling_scripts/overlap_review.py',
-             ROOT / 'Modeling_scripts/model_workflow.py']
+             ROOT / 'Modeling_scripts/model_workflow.py', ROOT / 'Modeling_scripts/project_policy.py']
     paths += list((ROOT / 'app/artifacts').glob('*'))
     paths += list((ROOT / 'Modeling_scripts').glob('*/*.ipynb'))
     paths += list((ROOT / 'Data_visualization/results').glob('*/*.json'))
@@ -167,7 +167,7 @@ with compare_tab:
                 st.markdown('**MAE ↓:** average rating error in points. **RMSE ↓:** gives larger errors more weight. **R² ↑:** variation explained relative to the test-set mean; it can be negative.')
             else:
                 st.markdown('**Hit precision:** how often predicted hits are actual hits. **Recall:** how many actual hits are found. **F1:** balances precision and recall. **Accuracy:** fraction of all correct labels. **Macro F1:** equally averages all three class F1 scores. **Moderate recall:** fraction of actual moderate movies identified. **ROC AUC:** Hit vs rest ranking. **Multiclass ROC AUC:** macro average of three one-vs-rest rankings.')
-                st.caption('The selection goal is ≥70% mean validation hit precision, then highest hit F1. It does not guarantee 70% test precision. The hit threshold selects Hit when reached; otherwise the larger Bust/Moderate probability wins. Inspect moderate recall and macro F1 alongside hit metrics.')
+                st.caption(f'The selection goal is ≥{SUCCESS_MIN_VALIDATION_PRECISION:.0%} mean validation hit precision, then highest hit F1. It does not guarantee {SUCCESS_MIN_VALIDATION_PRECISION:.0%} test precision. The hit threshold selects Hit when reached; otherwise the larger Bust/Moderate probability wins. Inspect moderate recall and macro F1 alongside hit metrics.')
     with st.expander('Model inventory and result availability'):
         st.dataframe(statuses, hide_index=True, width='stretch')
 

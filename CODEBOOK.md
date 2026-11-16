@@ -69,3 +69,5 @@ Actor supplements: `imdb_lead_actor_1985_1990.csv` contains distinct earlier mov
 - Current outcomes, revenue/ratio, popularity, vote count and IDs are excluded from predictors. Missing values are imputed inside training folds only.
 - Train before **2017-11-18**; tune on three expanding chronological folds. Rating selection minimizes MAE. Financial selection requires **≥70% mean validation hit precision**, then maximizes hit F1; also report macro F1 and moderate recall. This is not a test-performance guarantee.
 - See [data preparation](data/README.md), [modeling](Modeling_scripts/README.md), and [diagnostics](Modeling_scripts/DIAGNOSTICS.md) for workflow details.
+
+Shared goals: [project_policy.py](Modeling_scripts/project_policy.py). The dated `model_data_success_2026-11-04.csv` is a historical binary snapshot, excluded from active training and app inputs.

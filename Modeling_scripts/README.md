@@ -58,3 +58,8 @@ Overlap review now tests predefined genre/history trims inside training validati
 ## Verify the workflow
 
 `/opt/miniconda3/envs/ds6001/bin/python Modeling_scripts/verify_model_workflow.py` checks repeated-date fold separation, invalid source/target rejection, and that changing only test outcomes cannot change selection or fitted predictions. The simplification was also checked against every pre-refactor model variant's features, thresholds, scores and held-out predictions. CSVs and unrelated project edits were preserved.
+
+
+Shared dates, folds, task objectives and metric goals live in [project_policy.py](project_policy.py). Every active notebook imports them; changing a model's search settings does not silently change its objective. Check with `/opt/miniconda3/envs/ds6001/bin/python Modeling_scripts/verify_project_consistency.py --artifacts`.
+
+The shared [director-history experiment](../Data_visualization/history_feature_comparison.ipynb) now compares tuned lasso and three-class logistic with versus without **all nine** director-history fields. It uses nested chronological validation entirely inside training; the later test set is not scored.

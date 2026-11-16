@@ -75,11 +75,11 @@ Run `/opt/miniconda3/envs/ds6001/bin/python Modeling_scripts/verify_overlap_revi
 
 ## Current before/after results
 
-Both versions use identical CSVs, folds and test cohorts. VIF counts describe transformed training inputs (after PCA where used); raw predictor counts describe dataset columns supplied to the selected preprocessor. Remaining high VIFs are reported, not hidden. These bounded presets are not an exhaustive feature search.
+The latest main integration retains partner grids/exclusions and uses the shared policy. Both overlap versions use identical data/folds. VIF counts refer to transformed inputs (after PCA where used); raw counts refer to supplied dataset fields. Remaining high VIFs are reported, not hidden.
 
 ### Rating models
 
-| Model | Raw predictors | Inputs with VIF ≥10 | Validation MAE | Test MAE |
+| Model | Raw predictors | VIF ≥10 | Validation MAE | Test MAE |
 |---|---:|---:|---:|---:|
 | Linear regression | 36 → 31 | 23 → 3 | 0.5178 → 0.5175 | 0.5527 → 0.5501 |
 | Ridge | 38 → 33 | 52 → 4 | 0.5169 → 0.5077 | 0.4979 → 0.4985 |
@@ -88,14 +88,15 @@ Both versions use identical CSVs, folds and test cohorts. VIF counts describe tr
 | Random Forest | 40 → 35 | 23 → 3 | 0.4929 → 0.4939 | 0.5111 → 0.5105 |
 | Gradient Boosting | 40 → 35 | 23 → 3 | 0.4893 → 0.4906 | 0.5040 → 0.5040 |
 | KNN + PCA | 38 → 33 | 0 → 0 | 0.5545 → 0.5534 | 0.5371 → 0.5381 |
+| KNN | 40 → 35 | 23 → 3 | 0.5325 → 0.5286 | 0.5254 → 0.5289 |
 
 ### Three-class financial models
 
-| Model | Raw predictors | Inputs with VIF ≥10 | Validation hit F1 | Test macro F1 |
+| Model | Raw predictors | VIF ≥10 | Validation hit F1 | Test macro F1 |
 |---|---:|---:|---:|---:|
-| Logistic regression | 40 → 39 | 23 → 4 | 0.1490 → 0.1502 | 0.4222 → 0.4240 |
-| Random Forest | 40 → 37 | 23 → 2 | 0.2115 → 0.2238 | 0.4202 → 0.4233 |
+| Logistic regression | 25 → 25 | 0 → 0 | 0.1687 → 0.1687 | 0.4259 → 0.4259 |
+| Random Forest | 32 → 30 | 0 → 0 | 0.1867 → 0.2087 | 0.4130 → 0.4231 |
 | Gradient Boosting | 38 → 33 | 23 → 2 | 0.2448 → 0.2453 | 0.4172 → 0.4246 |
 | KNN + PCA | 40 → 37 | 0 → 0 | 0.1852 → 0.1852 | 0.4070 → 0.4124 |
 
-All selected financial trims retain ≥70% mean validation hit precision and the declared macro-F1 guard; this does not guarantee 70% test precision. Some test metrics worsened even when validation improved. KNN/PCA had VIF 1 already; its trims simplify the raw representation rather than fix component collinearity. Original selected predictions remain available as **Before overlap trim**.
+The common precision requirement is a mean training-validation selection rule, not a test guarantee. Original selected references remain available as Before overlap trim. The separate full-history experiment uses nested validation and can have explicitly infeasible inner goals.

@@ -1,6 +1,6 @@
 # Model visualizations
 
-Open [model_visualizations.ipynb](model_visualizations.ipynb) for graphs comparing **seven rating models and four success models**. Saved outputs can be viewed without retraining.
+Open [model_visualizations.ipynb](model_visualizations.ipynb) for graphs comparing **eight rating models and four success models**. Saved outputs can be viewed without retraining.
 
 ## Refresh graphs
 
@@ -26,4 +26,17 @@ For the overlap experiment, reports retain **Before overlap trim** alongside **S
 
 ## Shared feature experiment
 
-[history_feature_comparison.ipynb](history_feature_comparison.ipynb) is the single director-rating-history experiment formerly repeated in multiple rating notebooks. It fits fixed-settings Ridge with versus without three earlier director-rating features using chronological **training validation only**. It intentionally trains those small comparison models; the main `model_visualizations.ipynb` remains read-only and does not retrain models. Neither notebook changes CSVs.
+[history_feature_comparison.ipynb](history_feature_comparison.ipynb) compares tuned lasso and three-class logistic with versus without **all nine director-history features**. Both arms independently tune identical grids using nested chronological training validation. Financial tuning uses the same 70% precision / hit-F1 goal as every financial model. Outer validation scores are reported honestly, including infeasible inner goals; the later test set is not scored. This experiment trains comparison models; the main visualization notebook still only reads saved reports. Neither changes CSVs.
+
+
+Current full-history experiment (mean outer validation scores):
+
+| Metric | Without director history | With all nine fields |
+|---|---:|---:|
+| Lasso rating MAE ↓ | 0.5190 | 0.5182 |
+| Logistic macro F1 ↑ | 0.3743 | 0.3874 |
+| Logistic hit F1 ↑ | 0.2585 | 0.2834 |
+
+Rating gains varied across folds; financial macro/hit F1 improved in all three. Each financial arm met the 70% **inner** precision goal in only one of three outer training windows; the other windows retain flagged original references. The goal was not relaxed, and outer precision is not guaranteed. These are exploratory nested-validation results, not later-test or causal estimates.
+
+Fold-level comparison metadata is saved in [director_history_results.json](director_history_results.json) for review without rerunning the experiment; the large per-movie model reports remain ignored.

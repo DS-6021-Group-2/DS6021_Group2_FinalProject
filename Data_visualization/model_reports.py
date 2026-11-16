@@ -22,7 +22,7 @@ def dependency_hashes():
     return {str(p.relative_to(root)): file_hash(p) for p in [
         root / 'Modeling_scripts/financial_outcomes.py', root / 'Modeling_scripts/model_diagnostics.py',
         root / 'Modeling_scripts/overlap_review.py',
-        root / 'Modeling_scripts/model_workflow.py',
+        root / 'Modeling_scripts/model_workflow.py', root / 'Modeling_scripts/project_policy.py',
     ]}
 
 

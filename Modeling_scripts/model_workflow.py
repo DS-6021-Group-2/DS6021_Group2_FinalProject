@@ -20,6 +20,7 @@ from financial_outcomes import (CLASSES, HIT_CLASS, class_probabilities,
                                 predict_classes, financial_metrics)
 from overlap_review import review_overlap, prepare_trimmed_model
 from model_diagnostics import diagnose, show_diagnostics
+from project_policy import check_objective, DIRECTOR_HISTORY_FEATURES
 
 NUMERIC_FEATURES = [
     'runtime', 'log_budget', 'release_year', 'n_genres', 'imdb_director_count',
@@ -37,6 +38,7 @@ CONTROL_NAMES = [
     'THRESHOLDS', 'BASE_THRESHOLD', 'PCA_SETTINGS', 'RATING_GOALS', 'STRETCH_GOALS',
     'SHOW_EXTRA_COMPARISONS', 'SHOW_COEFFICIENTS', 'SHOW_DIAGNOSTIC_DETAILS',
     'OVERLAP_TRIMS', 'OVERLAP_MAE_TOLERANCE', 'OVERLAP_HIT_F1_TOLERANCE', 'OVERLAP_MACRO_F1_TOLERANCE',
+    'EXCLUDED_PREDICTORS', 'FEATURE_PRESETS',
 ]
 
 
@@ -98,7 +100,7 @@ def load_data(path, task, cutoff, n_splits):
             'BINARY_FEATURES': binary, 'FEATURE_COLUMNS': features}
 
 
-def feature_groups(data, names):
+def feature_groups(data, names, presets=None):
     movie = ['runtime', 'log_budget', 'release_year', 'n_genres', 'imdb_director_count'] + data['CATEGORICAL_FEATURES'] + ['is_sequel', 'is_english'] + [c for c in data['BINARY_FEATURES'] if c.startswith('genre_')]
     director = ['dir_prior_success_rate_smoothed', 'dir_prior_films_log1p', 'dir_years_active_log1p',
                 'dir_prior_known_films_log1p', 'dir_first_film', 'dir_no_track_record',
@@ -107,6 +109,9 @@ def feature_groups(data, names):
     company = ['company_films_5yr_log1p', 'franchise_prior_films_log1p']
     groups = {'Movie characteristics': movie, '+ Director history': movie + director,
               '+ Actor history': movie + director + actor, 'All features': movie + director + actor + company}
+    if presets:
+        groups = {name: (data['FEATURE_COLUMNS'] if columns is None else columns) for name,columns in presets.items()}
+    groups = {name:[c for c in columns if c in data['FEATURE_COLUMNS']] for name,columns in groups.items()}
     assert 'All features' in names and set(names) <= set(groups)
     assert set(groups['All features']) == set(data['FEATURE_COLUMNS'])
     return {name: groups[name] for name in names}
@@ -212,12 +217,20 @@ def train_models(factory, data, controls, joint_search=False):
     """
     config = {k: controls[k] for k in CONTROL_NAMES if k in controls}
     classification = data['task'] == 'success'
+    check_objective(config, data['task'])
+    excluded = config.get('EXCLUDED_PREDICTORS', [])
+    assert set(excluded) <= set(data['FEATURE_COLUMNS'])
+    if excluded:
+        data = data.copy()
+        for name in ['FEATURE_COLUMNS','NUMERIC_FEATURES','CATEGORICAL_FEATURES','BINARY_FEATURES']:
+            data[name] = [c for c in data[name] if c not in excluded]
+        for name in ['X','X_train','X_test']:data[name] = data[name][data['FEATURE_COLUMNS']].copy()
     assert not (classification and joint_search)
     if classification:
         assert config['THRESHOLDS'] and all(0 < t < 1 for t in config['THRESHOLDS'])
     ns = {**data, **config, 'factory': factory}
     training = {k: data[k] for k in ['X_train', 'y_train', 'tuning_splits', 'FEATURE_COLUMNS']}
-    groups = feature_groups(data, config['FEATURE_GROUPS_TO_COMPARE'])
+    groups = feature_groups(data, config['FEATURE_GROUPS_TO_COMPARE'], config.get('FEATURE_PRESETS'))
     original = factory(data['FEATURE_COLUMNS']).fit(data['X_train'], data['y_train'])
     baseline = (DummyClassifier(strategy='most_frequent') if classification else DummyRegressor(strategy='mean'))
     baseline.fit(np.zeros((len(data['y_train']), 1)), data['y_train'])

@@ -43,3 +43,8 @@ The sample favors movies with enough TMDB votes; it is not every movie. Large IM
 Reading data does not change a CSV. Export code and incoming Git changes can change files; `.gitignore` does not protect tracked datasets from overwrites.
 
 `log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Raw source CSVs are unchanged. Only `success` was relabeled in the cleaned and success-model tables; rating data and all predictor values were preserved.
+
+
+## Historical snapshot
+
+`model_data_success_2026-11-04.csv` is preserved from main unchanged for historical reproducibility. It uses the former binary encoding (0 below the hit benchmark, 1 hit) and is **not an active training/app input**. All current notebooks use `model_data_success.csv`: 0 Bust / 1 Moderate success / 2 Hit. Never combine old binary scores with current three-class results.

@@ -13,12 +13,13 @@ ROOT = Path(__file__).resolve().parents[1]
 import sys
 sys.path.insert(0, str(ROOT / 'Modeling_scripts'))
 from financial_outcomes import CLASS_LABELS, class_probabilities, predict_classes
+from project_policy import SUCCESS_MIN_VALIDATION_PRECISION
 LABELS = {
     'linear_model': 'Linear regression',
     'lasso_model': 'Lasso regression', 'elastic_net_model': 'Elastic net regression',
     'ridge_model': 'Ridge regression',
     'random_forest': 'Random Forest', 'gradient_boosting': 'Gradient Boosting',
-    'knn_pca': 'KNN + PCA', 'logistic_regression': 'Logistic regression',
+    'knn': 'KNN', 'knn_pca': 'KNN + PCA', 'logistic_regression': 'Logistic regression',
 }
 VARIANTS = {'Original': 'Original', 'Settings only': 'Settings tuned',
             'Selected': 'Validation-selected', 'Before overlap trim': 'Before overlap trim'}
@@ -61,6 +62,8 @@ def load_comparisons():
                     report = report_tools.load_reports(task, [key], 'Selected')[key]
                 else:
                     packaged = json.loads((ROOT / 'app/artifacts/comparisons.json').read_text())
+                    if f'{task}/{key}' not in packaged:
+                        raise FileNotFoundError('No packaged report for this model.')
                     report = packaged[f'{task}/{key}']
                     for path, expected in [(ROOT / report['dataset'], report['dataset_sha256']), (ROOT / 'Data_visualization/model_reports.py', report['writer_sha256'])]:
                         if report_tools.file_hash(path) != expected:

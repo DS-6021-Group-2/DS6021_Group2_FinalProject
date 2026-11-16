@@ -225,6 +225,7 @@ data/*
 !data/combined_dataset.csv
 !data/cleaned_movies.csv
 !data/model_data_success.csv
+!data/model_data_success_2026-11-04.csv
 !data/model_data_rating.csv
 data/*.tsv.gz
 .DS_Store

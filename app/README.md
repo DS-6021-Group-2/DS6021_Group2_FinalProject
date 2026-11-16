@@ -15,7 +15,7 @@ Lasso uses the validation-selected representation, penalty and trimmed feature l
 
 ## Models and comparisons
 
-`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 11 implemented model notebooks. The loader checks artifact hashes, dataset/code/shared-helper hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
+`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 12 implemented model notebooks. The loader checks artifact hashes, dataset/code/shared-helper hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
 
 Comparisons prefer current local `Data_visualization/results/` reports and fall back to packaged metrics when those ignored files are absent on a fresh clone. Both sources require matching dataset/code/writer/shared-helper hashes and the three-class outcome schema. Stale results are marked unavailable. Charts keep evaluation cohorts separate. CSVs and source notebooks are read-only inputs.
 
@@ -69,3 +69,5 @@ Model Comparison includes **Before overlap trim** to preserve the previous selec
 
 
 The exporter stops at the notebook cell tagged `model-training` and reads its `run` result. It does not depend on cell numbers or execute the results/diagnostics/report sections. Keep that tag on the training cell when reorganizing notebooks. Shared workflow code is included in report/artifact provenance checks.
+
+The shared policy defines the common financial precision/F1 goal and is checked with every model report. Main-branch binary snapshot data is not loaded by the app.
