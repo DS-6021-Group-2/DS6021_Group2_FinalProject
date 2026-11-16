@@ -25,6 +25,8 @@ Use `ds6001`, run notebooks from this folder, and Run All. Source/model dataset 
 - `SHOW_DIAGNOSTIC_DETAILS`: False shows interpretations; True adds technical tables.
 - Keep `CUTOFF_DATE` and `N_VALIDATION_SPLITS` consistent across models.
 
+Gradient Boosting includes Merasia's expanded grid behind `USE_MERASIA_SEARCH = True` (432 candidates); the default keeps the existing compact search and current results. `SHOW_FEATURE_IMPORTANCE = True` displays her top-15 transformed-input importance table. These importances describe the fitted model, not causal effects.
+
 Three expanding validation folds remain inside the 9,405-movie training period before **November 18, 2017**. All imputation, encoding, scaling, polynomial expansion, PCA and exact-alias removal are fitted within each training fold. Validation MAE chooses candidates. The later 3,871 test movies never choose features or settings.
 
 ## Current test results

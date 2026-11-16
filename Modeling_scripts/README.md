@@ -65,3 +65,5 @@ Shared dates, folds, task objectives and metric goals live in [project_policy.py
 The shared [director-history experiment](../Data_visualization/history_feature_comparison.ipynb) now compares tuned lasso and three-class logistic with versus without **all nine** director-history fields. It uses nested chronological validation entirely inside training; the later test set is not scored.
 
 Shared Python code lives in [helpers/](helpers/README.md). Verification scripts live in [tests/](../tests/README.md).
+
+Merasia's expanded gradient-boosting grids are optional in both notebooks (`USE_MERASIA_SEARCH`); existing searches remain the default. Her rating feature-importance view is available with `SHOW_FEATURE_IMPORTANCE`. The merge preserves canonical datasets, three-class labels, shared goals, and the removed legacy models' absence.
