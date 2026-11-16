@@ -8,6 +8,10 @@ import streamlit as st
 
 # Use the project package instead of a generic module cached by an older app run.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+# Reload helpers each run so a Cloud auto-update cannot keep an older copy in memory.
+import importlib
+import app.model_utils
+importlib.reload(app.model_utils)
 from app.model_utils import CLASS_LABELS, SUCCESS_MIN_VALIDATION_PRECISION, ROOT, LABELS, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
 
 st.set_page_config(page_title='Movie Potential | DS 6021', page_icon='🎬', layout='wide')
@@ -26,7 +30,7 @@ button[data-baseweb="tab"] {font-weight:600;}
 
 # Cache by file modification signatures so existing results refresh without retraining.
 def input_signature():
-    paths = [ROOT / 'data/model_data_rating.csv', ROOT / 'data/model_data_success.csv',
+    paths = [ROOT / 'app/model_utils.py', ROOT / 'data/model_data_rating.csv', ROOT / 'data/model_data_success.csv',
              ROOT / 'Data_visualization/model_reports.py', ROOT / 'Modeling_scripts/helpers/financial_outcomes.py',
              ROOT / 'Modeling_scripts/helpers/model_diagnostics.py', ROOT / 'Modeling_scripts/helpers/overlap_review.py',
              ROOT / 'Modeling_scripts/helpers/model_workflow.py', ROOT / 'Modeling_scripts/helpers/project_policy.py']
