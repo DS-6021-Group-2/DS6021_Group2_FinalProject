@@ -53,11 +53,11 @@ Overlap review now tests predefined genre/history trims inside training validati
 
 ## Short notebook layout
 
-Each notebook now has five sections: setup/controls, model, validation/tuning, final results, and diagnostics. The preprocessing/estimator remains visible; [model_workflow.py](../model_workflow.py) supplies shared data checks, folds, scoring and report export. There are no repeated post-selection feature-group or director-history fits. The last cell still saves all reference versions for app/visualization comparisons.
+Each notebook now has five sections: setup/controls, model, validation/tuning, final results, and diagnostics. The preprocessing/estimator remains visible; [model_workflow.py](../helpers/model_workflow.py) supplies shared data checks, folds, scoring and report export. There are no repeated post-selection feature-group or director-history fits. The last cell still saves all reference versions for app/visualization comparisons.
 
 Set `SHOW_EXTRA_COMPARISONS`, `SHOW_COEFFICIENTS` or `SHOW_DIAGNOSTIC_DETAILS` to True near the top for additional tables. Default output shows baseline/selected results, one main plot, and brief diagnostics. KNN retains one short PCA/no-PCA validation comparison. The director-rating experiment lives in [one shared notebook](../../Data_visualization/history_feature_comparison.ipynb).
 
 
 ## Latest main integration
 
-The partner's expanded logistic grid (C, class weights, L1/L2 mix with SAGA) and forest grid (depth, leaf size, feature sampling, weights and split criterion) are retained. Their predictor exclusions and categorical reference groups are model-side controls. Logistic convergence allowance is 10,000 iterations. The final task objective is standardized via [project_policy.py](../project_policy.py): ≥70% mean validation hit precision, then hit F1. ROC AUC remains a reported ranking metric. Old binary snapshot results are historical, not reused as three-class scores.
+The partner's expanded logistic grid (C, class weights, L1/L2 mix with SAGA) and forest grid (depth, leaf size, feature sampling, weights and split criterion) are retained. Their predictor exclusions and categorical reference groups are model-side controls. Logistic convergence allowance is 10,000 iterations. The final task objective is standardized via [project_policy.py](../helpers/project_policy.py): ≥70% mean validation hit precision, then hit F1. ROC AUC remains a reported ranking metric. Old binary snapshot results are historical, not reused as three-class scores.

@@ -17,7 +17,7 @@ from model_workflow import chronological_folds, rating_metrics
 from financial_outcomes import CLASSES, HIT_CLASS, class_probabilities, predict_classes, financial_metrics
 from project_policy import (DIRECTOR_HISTORY_FEATURES, N_VALIDATION_SPLITS, SUCCESS_MIN_VALIDATION_PRECISION,
                             SUCCESS_THRESHOLDS, BASE_THRESHOLD, check_objective)
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def load_model_spec(task, key):

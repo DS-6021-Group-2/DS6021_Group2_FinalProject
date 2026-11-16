@@ -13,16 +13,16 @@ from sklearn.metrics import (
 )
 
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'Modeling_scripts'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'Modeling_scripts' / 'helpers'))
 from financial_outcomes import class_probabilities, predict_classes, financial_metrics
 
 
 def dependency_hashes():
     root = Path(__file__).resolve().parents[1]
     return {str(p.relative_to(root)): file_hash(p) for p in [
-        root / 'Modeling_scripts/financial_outcomes.py', root / 'Modeling_scripts/model_diagnostics.py',
-        root / 'Modeling_scripts/overlap_review.py',
-        root / 'Modeling_scripts/model_workflow.py', root / 'Modeling_scripts/project_policy.py',
+        root / 'Modeling_scripts/helpers/financial_outcomes.py', root / 'Modeling_scripts/helpers/model_diagnostics.py',
+        root / 'Modeling_scripts/helpers/overlap_review.py',
+        root / 'Modeling_scripts/helpers/model_workflow.py', root / 'Modeling_scripts/helpers/project_policy.py',
     ]}
 
 

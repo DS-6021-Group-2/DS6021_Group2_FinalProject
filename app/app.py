@@ -27,9 +27,9 @@ button[data-baseweb="tab"] {font-weight:600;}
 # Cache by file modification signatures so existing results refresh without retraining.
 def input_signature():
     paths = [ROOT / 'data/model_data_rating.csv', ROOT / 'data/model_data_success.csv',
-             ROOT / 'Data_visualization/model_reports.py', ROOT / 'Modeling_scripts/financial_outcomes.py',
-             ROOT / 'Modeling_scripts/model_diagnostics.py', ROOT / 'Modeling_scripts/overlap_review.py',
-             ROOT / 'Modeling_scripts/model_workflow.py', ROOT / 'Modeling_scripts/project_policy.py']
+             ROOT / 'Data_visualization/model_reports.py', ROOT / 'Modeling_scripts/helpers/financial_outcomes.py',
+             ROOT / 'Modeling_scripts/helpers/model_diagnostics.py', ROOT / 'Modeling_scripts/helpers/overlap_review.py',
+             ROOT / 'Modeling_scripts/helpers/model_workflow.py', ROOT / 'Modeling_scripts/helpers/project_policy.py']
     paths += list((ROOT / 'app/artifacts').glob('*'))
     paths += list((ROOT / 'Modeling_scripts').glob('*/*.ipynb'))
     paths += list((ROOT / 'Data_visualization/results').glob('*/*.json'))

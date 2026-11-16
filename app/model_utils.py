@@ -11,7 +11,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 import sys
-sys.path.insert(0, str(ROOT / 'Modeling_scripts'))
+sys.path.insert(0, str(ROOT / 'Modeling_scripts' / 'helpers'))
 from financial_outcomes import CLASS_LABELS, class_probabilities, predict_classes
 from project_policy import SUCCESS_MIN_VALIDATION_PRECISION
 LABELS = {

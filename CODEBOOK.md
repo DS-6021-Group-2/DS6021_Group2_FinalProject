@@ -69,4 +69,4 @@ Missing finances are unclassified. Categories measure revenue/budget, not profit
 - Outcomes, revenue/ratio, popularity, vote count and IDs are excluded from predictors. Imputation uses training folds only.
 - Train before **2017-11-18**, with three expanding validation folds. Minimize rating MAE; for finances require **≥70% mean validation hit precision**, then maximize hit F1. Also report macro F1/moderate recall; test performance may differ.
 
-Details: [data](data/README.md), [modeling](Modeling_scripts/README.md), [diagnostics](Modeling_scripts/DIAGNOSTICS.md), [shared goals](Modeling_scripts/project_policy.py). `model_data_success_2026-11-04.csv` is an inactive binary snapshot.
+Details: [data](data/README.md), [modeling](Modeling_scripts/README.md), [diagnostics](Modeling_scripts/DIAGNOSTICS.md), [shared goals](Modeling_scripts/helpers/project_policy.py). `model_data_success_2026-11-04.csv` is an inactive binary snapshot.

@@ -19,7 +19,7 @@ Every model now uses the same layout:
 4. **Final results:** baseline versus selected training/test scores and one main plot. KNN also shows one short PCA/no-PCA validation comparison.
 5. **Diagnostics:** brief safeguards, before/after VIF, limitations and report export.
 
-Repeated fold construction, scoring and reporting live in [model_workflow.py](model_workflow.py). The model itself stays in each notebook. All original/settings-only/before-trim/selected versions remain in saved reports and the app.
+Repeated fold construction, scoring and reporting live in [model_workflow.py](helpers/model_workflow.py). The model itself stays in each notebook. All original/settings-only/before-trim/selected versions remain in saved reports and the app.
 
 | Top switch | Default | Shows |
 |---|---|---|
@@ -60,8 +60,8 @@ Overlap review now tests predefined genre/history trims inside training validati
 `/opt/miniconda3/envs/ds6001/bin/python tests/verify_model_workflow.py` checks repeated-date fold separation, invalid source/target rejection, and that changing only test outcomes cannot change selection or fitted predictions. The simplification was also checked against every pre-refactor model variant's features, thresholds, scores and held-out predictions. CSVs and unrelated project edits were preserved.
 
 
-Shared dates, folds, task objectives and metric goals live in [project_policy.py](project_policy.py). Every active notebook imports them; changing a model's search settings does not silently change its objective. Check with `/opt/miniconda3/envs/ds6001/bin/python tests/verify_project_consistency.py --artifacts`.
+Shared dates, folds, task objectives and metric goals live in [project_policy.py](helpers/project_policy.py). Every active notebook imports them; changing a model's search settings does not silently change its objective. Check with `/opt/miniconda3/envs/ds6001/bin/python tests/verify_project_consistency.py --artifacts`.
 
 The shared [director-history experiment](../Data_visualization/history_feature_comparison.ipynb) now compares tuned lasso and three-class logistic with versus without **all nine** director-history fields. It uses nested chronological validation entirely inside training; the later test set is not scored.
 
-Verification scripts live in [tests/](../tests/README.md); this folder keeps only the six modeling/experiment helpers.
+Shared Python code lives in [helpers/](helpers/README.md). Verification scripts live in [tests/](../tests/README.md).

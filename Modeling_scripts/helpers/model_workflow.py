@@ -411,7 +411,7 @@ def show_diagnostics_summary(ns):
 
 
 def save_report(ns, notebook_path):
-    path=Path(__file__).resolve().parents[1]/'Data_visualization/model_reports.py'
+    path=Path(__file__).resolve().parents[2]/'Data_visualization/model_reports.py'
     spec=importlib.util.spec_from_file_location('notebook_model_reports',path)
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     return module.save_model_report(ns,notebook_path)

@@ -6,11 +6,11 @@
       "model_key": "lasso_model",
       "outcome_schema": "rating-v1",
       "dependencies_sha256": {
-        "Modeling_scripts/financial_outcomes.py": "b13dc7645ed5de500ae05b2370ccda3a83b9bf00753d1b48b24d7e00fabee0a1",
-        "Modeling_scripts/model_diagnostics.py": "1cd1db1dea7dd80310a4663b8b1e5eb80d5429727e9e1ddcabf94c84650765fc",
-        "Modeling_scripts/overlap_review.py": "8522c493cd97ac52e742630d092d56affa9b8b74b89862ad46af60491dde165a",
-        "Modeling_scripts/model_workflow.py": "30bee5733d7cbc1ab1507c288149322f330232a8b4787d488d52dfa43d498717",
-        "Modeling_scripts/project_policy.py": "2c701aa227b444c8cb5750f1c9a3d89a43cf5017347df14caf820376d080d5fe"
+        "Modeling_scripts/helpers/financial_outcomes.py": "b13dc7645ed5de500ae05b2370ccda3a83b9bf00753d1b48b24d7e00fabee0a1",
+        "Modeling_scripts/helpers/model_diagnostics.py": "1cd1db1dea7dd80310a4663b8b1e5eb80d5429727e9e1ddcabf94c84650765fc",
+        "Modeling_scripts/helpers/overlap_review.py": "8522c493cd97ac52e742630d092d56affa9b8b74b89862ad46af60491dde165a",
+        "Modeling_scripts/helpers/model_workflow.py": "a6d1c67cfb56c305c6661ba8e3222f3dd788f447880f368cb7119e8326267171",
+        "Modeling_scripts/helpers/project_policy.py": "2c701aa227b444c8cb5750f1c9a3d89a43cf5017347df14caf820376d080d5fe"
       },
       "class_labels": null,
       "artifact": "rating_pipeline.joblib",
@@ -18,7 +18,7 @@
       "dataset": "data/model_data_rating.csv",
       "dataset_sha256": "88f7d844340038dcf7e5792f32509a3fc6c6242cf6101ad66561f42bf1ca9aff",
       "notebook": "Modeling_scripts/rating_models/lasso_model.ipynb",
-      "code_sha256": "3ce541c590bd86271b32049163d5fab3b90f3222e056b5a3b837761809cd0ab8",
+      "code_sha256": "66c39f6a9d71b8fee7e6eb216bcb4ca96b8fcaf737bdda2644447b63078901b2",
       "cutoff": "2017-11-18",
       "input_columns": [
         "runtime",
@@ -118,11 +118,11 @@
       "model_key": "logistic_regression",
       "outcome_schema": "bust-moderate-hit-v1",
       "dependencies_sha256": {
-        "Modeling_scripts/financial_outcomes.py": "b13dc7645ed5de500ae05b2370ccda3a83b9bf00753d1b48b24d7e00fabee0a1",
-        "Modeling_scripts/model_diagnostics.py": "1cd1db1dea7dd80310a4663b8b1e5eb80d5429727e9e1ddcabf94c84650765fc",
-        "Modeling_scripts/overlap_review.py": "8522c493cd97ac52e742630d092d56affa9b8b74b89862ad46af60491dde165a",
-        "Modeling_scripts/model_workflow.py": "30bee5733d7cbc1ab1507c288149322f330232a8b4787d488d52dfa43d498717",
-        "Modeling_scripts/project_policy.py": "2c701aa227b444c8cb5750f1c9a3d89a43cf5017347df14caf820376d080d5fe"
+        "Modeling_scripts/helpers/financial_outcomes.py": "b13dc7645ed5de500ae05b2370ccda3a83b9bf00753d1b48b24d7e00fabee0a1",
+        "Modeling_scripts/helpers/model_diagnostics.py": "1cd1db1dea7dd80310a4663b8b1e5eb80d5429727e9e1ddcabf94c84650765fc",
+        "Modeling_scripts/helpers/overlap_review.py": "8522c493cd97ac52e742630d092d56affa9b8b74b89862ad46af60491dde165a",
+        "Modeling_scripts/helpers/model_workflow.py": "a6d1c67cfb56c305c6661ba8e3222f3dd788f447880f368cb7119e8326267171",
+        "Modeling_scripts/helpers/project_policy.py": "2c701aa227b444c8cb5750f1c9a3d89a43cf5017347df14caf820376d080d5fe"
       },
       "class_labels": {
         "0": "Bust",
@@ -134,7 +134,7 @@
       "dataset": "data/model_data_success.csv",
       "dataset_sha256": "b7976d8e19bcb0122caab7940e9f4cc8a4149811f2f43c46dd54c894eac8bbd0",
       "notebook": "Modeling_scripts/success_models/logistic_regression.ipynb",
-      "code_sha256": "10f35da5d8836dbde1d5798f9a6948aceaf8d582ca292a2ad3aebd903547e1a9",
+      "code_sha256": "416412c4bd7f6aaf555dd459471bf5f3de9d24af056c785120abf0abef9c9267",
       "cutoff": "2017-11-18",
       "input_columns": [
         "runtime",

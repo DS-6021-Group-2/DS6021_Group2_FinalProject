@@ -33,7 +33,7 @@ Choose the simplest candidate with competitive validation results. Lower VIF is 
 
 ## Technical scope
 
-[model_diagnostics.py](model_diagnostics.py) checks the actual transformed **training** matrix, including encoding and polynomial terms. VIF is computed by centered/scaled SVD with an intercept. Exact dependencies receive infinite VIF, constants undefined VIF. PCA models show matrices before and after reduction; full dummy encodings can have expected dependencies. Regularization changes coefficients, not input VIF. Trees do not require independent predictors, although correlations can distort importance interpretation.
+[model_diagnostics.py](helpers/model_diagnostics.py) checks the actual transformed **training** matrix, including encoding and polynomial terms. VIF is computed by centered/scaled SVD with an intercept. Exact dependencies receive infinite VIF, constants undefined VIF. PCA models show matrices before and after reduction; full dummy encodings can have expected dependencies. Regularization changes coefficients, not input VIF. Trees do not require independent predictors, although correlations can distort importance interpretation.
 
 Other checks cover IDs, exclusions, date/row separation and chronological folds; numeric imputation/scaling and PCA state; missingness, finite transforms, unseen categories, duplicate patterns and drift; baseline comparisons and convergence. Regression adds residual/bias summaries, rating bounds, and OLS-only leverage/Cook's distance. Classification adds class balance, all three class metrics, multiclass Brier/log loss, and a hit-vs-rest reliability table. Brier/log loss measure overall probability quality, not calibration alone. No assumption test proves predictive validity.
 
