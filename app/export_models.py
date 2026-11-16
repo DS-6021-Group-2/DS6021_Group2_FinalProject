@@ -10,6 +10,7 @@ import io
 import json
 import os
 import platform
+import sys
 
 import joblib
 import nbformat
@@ -18,6 +19,7 @@ import pandas as pd
 import sklearn
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 ARTIFACTS = ROOT / 'app/artifacts'
 
 
@@ -25,11 +27,11 @@ def export(rating_only=False):
     spec = importlib.util.spec_from_file_location('export_reports', ROOT / 'Data_visualization/model_reports.py')
     reports = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(reports)
-    from model_utils import class_probabilities, predict_classes
+    from app.model_utils import class_probabilities, predict_classes
     before = {p: reports.file_hash(p) for p in (ROOT / 'data').glob('*.csv')}
     if rating_only:
         # Verify and retain the existing success pipeline without fitting it again.
-        from model_utils import load_prediction_models
+        from app.model_utils import load_prediction_models
         load_prediction_models()
         manifest = json.loads((ARTIFACTS / 'manifest.json').read_text())
     else:

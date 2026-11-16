@@ -2,13 +2,16 @@
 from pathlib import Path
 import hashlib
 import json
+import sys
+import types
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from streamlit.testing.v1 import AppTest
 
-from model_utils import class_probabilities, predict_classes, CLASS_LABELS, ROOT, load_movie_catalog, load_comparisons, load_prediction_models
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.model_utils import class_probabilities, predict_classes, CLASS_LABELS, ROOT, load_movie_catalog, load_comparisons, load_prediction_models
 
 
 def verify():
@@ -70,7 +73,17 @@ def verify():
         print(f'PASS: {task} pipeline matches recorded outputs on {len(rows):,} test movies.')
 
     catalog = load_movie_catalog()
-    at = AppTest.from_file(str(ROOT / 'app/app.py'), default_timeout=45).run()
+    # A long-running Cloud process can retain the generic module from an old run.
+    # The app must import its own package even when that stale name is present.
+    previous_module = sys.modules.get('model_utils')
+    sys.modules['model_utils'] = types.ModuleType('model_utils')
+    try:
+        at = AppTest.from_file(str(ROOT / 'app/app.py'), default_timeout=45).run()
+    finally:
+        if previous_module is None:
+            sys.modules.pop('model_utils', None)
+        else:
+            sys.modules['model_utils'] = previous_module
     assert not at.exception, at.exception
     assert any(m.label == 'Models in comparison' and m.value == str(len(inventory)) for m in at.metric)
     assert any('Lasso regression' in item.value for item in at.markdown)
@@ -90,7 +103,7 @@ def verify():
         assert any(m.label == 'Actual financial outcome' and m.value == label for m in at.metric)
         at.button[0].click().run()
         assert not at.exception, at.exception
-        from model_utils import predict_movie
+        from app.model_utils import predict_movie
         result = predict_movie(int(example.tmdb_id), models)['success']
         np.testing.assert_allclose(sum(result['probabilities'].values()), 1, atol=1e-8)
         assert result['label'] in CLASS_LABELS.values()
@@ -104,7 +117,7 @@ def verify():
     assert any(m.label == 'Estimated hit probability' and m.value == '—' for m in at.metric)
     assert any(m.label == 'Actual financial outcome' and m.value == 'Unavailable' for m in at.metric)
     training_id = int(models['rating'][2].loc[lambda d: d.release_date.lt('2017-11-18'), 'tmdb_id'].iloc[0])
-    from model_utils import predict_movie
+    from app.model_utils import predict_movie
     try:
         predict_movie(training_id, models)
     except ValueError:

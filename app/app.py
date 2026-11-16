@@ -6,9 +6,9 @@ import json
 import pandas as pd
 import streamlit as st
 
-# Also supports Streamlit AppTest when invoked from the repository root.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from model_utils import CLASS_LABELS, SUCCESS_MIN_VALIDATION_PRECISION, ROOT, LABELS, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
+# Use the project package instead of a generic module cached by an older app run.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app.model_utils import CLASS_LABELS, SUCCESS_MIN_VALIDATION_PRECISION, ROOT, LABELS, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
 
 st.set_page_config(page_title='Movie Potential | DS 6021', page_icon='🎬', layout='wide')
 st.markdown('''<style>

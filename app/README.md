@@ -34,17 +34,20 @@ This reruns the lasso and logistic notebooks' tagged training/selection cells in
 Use the connected account and these settings after the changes are on GitHub:
 
 - Repository: `DS-6021-Group-2/DS6021_Group2_FinalProject`
-- Branch: **Walt**
+- Branch: **Walt** (the existing Cloud deployment; fast-forward it from tested `main` when publishing).
 - Main file: **app/app.py**
 - Python: **3.14**, matching ds6001; confirm the platform offers it.
 - Dependencies: `app/requirements.txt` (matching pinned model-library versions).
 - No secrets or `.env` values are required by the app.
 
-Do not retrain models on startup. If Python 3.14 or the pinned dependencies are unavailable on the platform, stop and choose a compatible hosting environment rather than silently loading models under different library versions. This repository does not contain a public deployment URL until publishing succeeds.
+App URL: [ds6021group2finalproject.streamlit.app](https://ds6021group2finalproject.streamlit.app/).
+
+Do not retrain models on startup. If Python 3.14 or the pinned dependencies are unavailable on the platform, stop and choose a compatible hosting environment rather than silently loading models under different library versions. After changing import paths, [reboot the Cloud app](https://docs.streamlit.io/deploy/streamlit-community-cloud/manage-your-app/reboot-your-app) to clear modules retained by the previous process.
 
 ## Files and verification
 
 - `app.py`: UI and cached prediction calls.
+- `__init__.py`: identifies the app package so imports use `app.model_utils` instead of an older cached `model_utils` module.
 - `model_utils.py`: read-only data, validated models, and predictions.
 - `export_models.py`: explicit offline build, never imported by the app.
 - `verify_models.py`: read-only inventory, score, pipeline, and Streamlit UI checks.
