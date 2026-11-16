@@ -145,20 +145,22 @@ with compare_tab:
                               format_func=lambda k, current_task=task: f"{cohorts[(current_task,k)]['Test movies']:,} test movies · from {cohorts[(current_task,k)]['Test starts']} · {k}")
         details = cohorts[(task, cohort)]
         st.caption(f"{details['Dataset']} · {details['Training movies']:,} training / {details['Test movies']:,} test movies · test starts {details['Test starts']}")
-        versions = st.multiselect('Versions to compare', ['Original', 'Settings tuned', 'Before overlap trim', 'Validation-selected'],
-                                  default=['Original', 'Validation-selected'], key=f'{task}_versions')
-        filtered = task_scores.loc[task_scores.Cohort.eq(cohort) & task_scores.Version.isin(versions)].copy()
+        in_cohort = task_scores.loc[task_scores.Cohort.eq(cohort)]
+        baseline_name = 'Baseline (predicts mean rating)' if task == 'rating' else 'Baseline (predicts most common class)'
+        tuned = in_cohort.loc[in_cohort.Version.eq('Validation-selected')].assign(Type='Tuned model')
+        baseline = in_cohort.loc[in_cohort.Version.eq('Baseline')].head(1).assign(Model=baseline_name, Type='Baseline')
+        filtered = pd.concat([baseline, tuned], ignore_index=True)
         metrics = ['MAE', 'RMSE', 'R2'] if task == 'rating' else ['Macro F1', 'Moderate recall', 'Moderate F1', 'Hit precision', 'Hit recall', 'Hit F1', 'Accuracy', 'Balanced accuracy', 'ROC AUC', 'Multiclass ROC AUC']
-        if filtered.empty:
-            st.info('Choose at least one version with saved results.')
+        if tuned.empty:
+            st.info('No tuned-model results are saved for this cohort.')
         else:
-            columns = ['Model', 'Version'] + (['Threshold'] if task == 'success' else []) + metrics
+            columns = ['Model'] + (['Threshold'] if task == 'success' else []) + metrics
             display = filtered[columns].rename(columns={'R2': 'R²'})
-            st.dataframe(display, hide_index=True, width='stretch', column_config={c: st.column_config.NumberColumn(format='%.3f') for c in display if c not in ['Model', 'Version']})
+            st.dataframe(display, hide_index=True, width='stretch', column_config={c: st.column_config.NumberColumn(format='%.3f') for c in display if c != 'Model'})
             metric = st.selectbox('Chart metric', metrics, key=f'{task}_metric', format_func=lambda x: 'R²' if x == 'R2' else x)
-            chart = filtered.pivot(index='Model', columns='Version', values=metric)
-            st.bar_chart(chart, horizontal=True, stack=False, x_label='Model', y_label=metric)
-        st.caption('Original = fixed baseline; Settings tuned = all-feature search; Before overlap trim = previous selected model; Validation-selected = final overlap-reviewed selection (and hit threshold for success).')
+            st.bar_chart(filtered, x='Model', y=metric, color='Type', horizontal=True,
+                         x_label='Model', y_label='R²' if metric == 'R2' else metric)
+        st.caption('Baseline = a model that ignores every feature and always predicts the training mean rating (ratings) or the most common class (success). Tuned model = the final validation-selected version of each model (and hit threshold for success).')
         if not unavailable.empty:
             st.warning('Some models have unavailable results; they remain listed here.')
             st.dataframe(unavailable[['Model', 'Status']], hide_index=True, width='stretch')

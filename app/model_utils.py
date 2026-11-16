@@ -91,6 +91,8 @@ def load_comparisons():
                     rows.append({'Task': task, 'Model': label, 'Version': VARIANTS[variant],
                                  'Cohort': cohort, 'Threshold': result['threshold'],
                                  **result['test_metrics']})
+                rows.append({'Task': task, 'Model': label, 'Version': 'Baseline', 'Cohort': cohort,
+                             'Threshold': None, **report['baseline_test_metrics']})
                 status = 'Verified saved results'
             except FileNotFoundError:
                 status = 'Results unavailable — no saved report'
