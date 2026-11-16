@@ -8,7 +8,7 @@ Open [feature_engineering.ipynb](feature_engineering.ipynb), select **`ds6001`**
 
 | Output | Movies | Used for |
 |---|---:|---|
-| `../data/model_data_success.csv` | 6,919 | Predicting hit or bust. |
+| `../data/model_data_success.csv` | 6,919 | Predicting Bust / Moderate success / Hit. |
 | `../data/model_data_rating.csv` | 13,276 | Predicting viewer rating, without financial filters. |
 
 The notebook reads `cleaned_movies.csv`, `combined_dataset.csv`, `imdb_movies.csv`, and `lead_actor_backfill.csv` from `../data/`. The actor supplement is already saved; no API pull is needed.
@@ -28,7 +28,7 @@ Source and cleaned CSVs are preserved. Identical model exports are reused. If an
 |---|---|
 | Movie characteristics | Runtime, release year/month, genres, language, certification, and director count. |
 | Director experience | Number of earlier IMDb films and years since the earliest observed film. |
-| Director financial record | Success rate of earlier films with known finances, plus supporting count and no-record flag. |
+| Director financial record | Hit fraction of earlier films with known finances, plus supporting count and no-record flag. |
 | Director rating record | Average rating of observed earlier movies, plus supporting count and no-history flag. |
 | Lead actor | Observed film activity in the previous five years, including eligible 1985–1990 IMDb credits. |
 | Company and franchise | Recent production-company activity, earlier franchise films, and sequel status. |
@@ -51,4 +51,4 @@ To rebuild the original actor supplement, place the required IMDb downloads in `
 
 See the [collection guide](../collecting_and_cleaning_data_scripts/README.md) for download requirements. Normal modeling uses the existing files.
 
-`log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Source and cleaned CSVs are unchanged.
+`log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Raw source CSVs are unchanged. Cleaning now labels success as 0 Bust / 1 Moderate success / 2 Hit; this notebook preserves those targets. Director financial histories still count only earlier hits, so predictors and rating data remain unchanged.

@@ -12,6 +12,19 @@ from sklearn.metrics import (
     f1_score, roc_auc_score, mean_absolute_error, mean_squared_error, r2_score,
 )
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'Modeling_scripts'))
+from financial_outcomes import class_probabilities, predict_classes, financial_metrics
+
+
+def dependency_hashes():
+    root = Path(__file__).resolve().parents[1]
+    return {str(p.relative_to(root)): file_hash(p) for p in [
+        root / 'Modeling_scripts/financial_outcomes.py', root / 'Modeling_scripts/model_diagnostics.py',
+        root / 'Modeling_scripts/overlap_review.py',
+        root / 'Modeling_scripts/model_workflow.py',
+    ]}
+
 
 def file_hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -34,25 +47,20 @@ def _metrics(actual, predicted, probability=None):
             "RMSE": float(np.sqrt(mean_squared_error(actual, predicted))),
             "R2": float(r2_score(actual, predicted)),
         }
-    return {
-        "Accuracy": float(accuracy_score(actual, predicted)),
-        "Balanced accuracy": float(balanced_accuracy_score(actual, predicted)),
-        "Hit precision": float(precision_score(actual, predicted, zero_division=0)),
-        "Hit recall": float(recall_score(actual, predicted, zero_division=0)),
-        "Hit F1": float(f1_score(actual, predicted, zero_division=0)),
-        "ROC AUC": float(roc_auc_score(actual, probability)),
-    }
+    return financial_metrics(actual, predicted, probability)
 
 
 def _validation(ns, simple, classification, variant):
     rename = {
         "Hit_F1": "Hit F1", "F1": "Hit F1", "Hit_precision": "Hit precision",
         "Precision": "Hit precision", "Hit_recall": "Hit recall", "Recall": "Hit recall",
-        "Balanced_accuracy": "Balanced accuracy", "ROC_AUC": "ROC AUC",
+        "Balanced_accuracy": "Balanced accuracy", "ROC_AUC": "ROC AUC", "Macro_F1": "Macro F1",
     }
-    desired = {"MAE", "RMSE", "R2", "Hit F1", "Hit precision", "Hit recall", "Accuracy", "Balanced accuracy", "ROC AUC"}
-    if variant == "Selected":
-        if simple:
+    desired = {"MAE", "RMSE", "R2", "Hit F1", "Hit precision", "Hit recall", "Accuracy", "Balanced accuracy", "ROC AUC", "Macro F1"}
+    if variant in ["Selected", "Before overlap trim"]:
+        if variant == "Before overlap trim":
+            row = ns["overlap_reference_validation"]
+        elif simple:
             key = (ns["selected_version"], ns["selected_threshold"]) if classification else ns["selected_version"]
             row = ns["feature_comparison"].loc[key]
         else:
@@ -101,16 +109,18 @@ def save_model_report(ns, notebook_path):
             "Settings only": (ns["settings_model"], ns["X_train"], ns["X_test"], base_threshold, ns["FEATURE_COLUMNS"]),
             "Selected": (ns["model"], ns["X_train"], ns["X_test"], float(ns.get("selected_threshold", base_threshold)), ns["selected_feature_columns"]),
         }
+    if 'overlap_reference_model' in ns:
+        entries['Before overlap trim'] = (ns['overlap_reference_model'], ns['X_train'], ns['X_test'],
+            float(ns['overlap_reference_threshold']) if classification else base_threshold, ns['overlap_reference_features'])
     metadata = movies.loc[y_test.index, ["tmdb_id", "title_tmdb", "release_date"]].copy()
     metadata["actual"] = y_test.to_numpy()
     versions = {}
     for variant, (estimator, train_x, test_x, threshold, features) in entries.items():
         if classification:
-            position = list(estimator.classes_).index(1)
-            train_probability = estimator.predict_proba(train_x)[:, position]
-            test_probability = estimator.predict_proba(test_x)[:, position]
-            train_prediction = (train_probability >= threshold).astype(int)
-            test_prediction = (test_probability >= threshold).astype(int)
+            train_probability = class_probabilities(estimator, train_x)
+            test_probability = class_probabilities(estimator, test_x)
+            train_prediction = predict_classes(train_probability, threshold)
+            test_prediction = predict_classes(test_probability, threshold)
         else:
             train_probability = test_probability = None
             train_prediction = estimator.predict(train_x)
@@ -119,7 +129,8 @@ def save_model_report(ns, notebook_path):
         predictions = metadata.copy()
         predictions["predicted"] = test_prediction
         if classification:
-            predictions["hit_probability"] = test_probability
+            for i, label in enumerate(['bust_probability', 'moderate_probability', 'hit_probability']):
+                predictions[label] = test_probability[:, i]
         else:
             predictions["residual"] = y_test.to_numpy() - test_prediction
         versions[variant] = {
@@ -133,9 +144,11 @@ def save_model_report(ns, notebook_path):
     baseline = ns["baseline"]
     dummy_x = np.zeros((len(y_test), 1))
     baseline_prediction = baseline.predict(dummy_x)
-    baseline_probability = baseline.predict_proba(dummy_x)[:, list(baseline.classes_).index(1)] if classification else None
+    baseline_probability = class_probabilities(baseline, dummy_x) if classification else None
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "outcome_schema": "bust-moderate-hit-v1" if classification else "rating-v1",
+        "dependencies_sha256": dependency_hashes(),
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "task": task, "model_key": notebook_path.stem,
         "notebook": str(notebook_path.relative_to(root)),
@@ -150,6 +163,12 @@ def save_model_report(ns, notebook_path):
         "baseline_test_metrics": _metrics(y_test, baseline_prediction, baseline_probability),
         "versions": versions,
         "feature_fold_results": _records(ns["feature_fold_results"]),
+        "overlap_review": {
+            "status": ns['overlap_review']['status'], "rules": ns['overlap_review']['rules'],
+            "comparison": _records(ns['diagnostic_results']['overlap_comparison']),
+            "candidate_count": len(ns['overlap_review']['candidates']),
+        } if 'overlap_review' in ns else None,
+        "overlap_fold_results": _records(ns['overlap_review']['folds']) if 'overlap_review' in ns else [],
     }
     directory = Path(__file__).resolve().parent / "results" / task
     directory.mkdir(parents=True, exist_ok=True)
@@ -178,6 +197,10 @@ def load_reports(task, model_keys, variant="Selected"):
         ]:
             if current != stored:
                 raise ValueError(f"Stale {label} for {report['notebook']}. Save that notebook and Run All to refresh its visualization report.")
+        if report.get('dependencies_sha256') != dependency_hashes():
+            raise ValueError(f"Stale shared model helpers for {report['notebook']}. Run All to refresh.")
+        if task == 'success' and report.get('outcome_schema') != 'bust-moderate-hit-v1':
+            raise ValueError('A binary report cannot be used for the three-class task.')
         if variant not in report["versions"]:
             raise ValueError(f"Variant {variant!r} is unavailable in {report['notebook']}.")
         current_signature = (report["dataset_sha256"], report["cutoff"], report["train_count"], report["test_count"])

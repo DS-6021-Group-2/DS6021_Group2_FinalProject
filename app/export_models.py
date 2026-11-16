@@ -21,15 +21,25 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / 'app/artifacts'
 
 
-def export():
+def export(rating_only=False):
     spec = importlib.util.spec_from_file_location('export_reports', ROOT / 'Data_visualization/model_reports.py')
     reports = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(reports)
+    from model_utils import class_probabilities, predict_classes
     before = {p: reports.file_hash(p) for p in (ROOT / 'data').glob('*.csv')}
-    manifest = {'sklearn_version': sklearn.__version__, 'python_version': platform.python_version(), 'models': {}}
+    if rating_only:
+        # Verify and retain the existing success pipeline without fitting it again.
+        from model_utils import load_prediction_models
+        load_prediction_models()
+        manifest = json.loads((ARTIFACTS / 'manifest.json').read_text())
+    else:
+        manifest = {'sklearn_version': sklearn.__version__, 'python_version': platform.python_version(), 'models': {}}
     ARTIFACTS.mkdir(exist_ok=True)
     original_cwd = Path.cwd()
-    for task, key in [('rating', 'ridge_model'), ('success', 'logistic_regression')]:
+    selections = [('rating', 'lasso_model')]
+    if not rating_only:
+        selections.append(('success', 'logistic_regression'))
+    for task, key in selections:
         reference = reports.load_reports(task, [key])[key]
         notebook = ROOT / reference['notebook']
         nb = nbformat.read(notebook, as_version=4)
@@ -38,11 +48,17 @@ def export():
             os.chdir(notebook.parent)
             # Run the existing training/selection code, never refit on the test set.
             with contextlib.redirect_stdout(io.StringIO()):
-                for cell in nb.cells[:14]:
+                trained = False
+                for cell in nb.cells:
                     if cell.cell_type == 'code':
                         exec(compile(cell.source, str(notebook), 'exec'), ns)
+                    if 'model-training' in cell.metadata.get('tags', []):
+                        trained = True
+                        break
+                assert trained, 'Notebook is missing the tagged model-training cell.'
         finally:
             os.chdir(original_cwd)
+        ns = ns['run']
         model = ns['model']
         selected = reference['versions']['Selected']
         ids = ns['movies'].loc[ns['y_test'].index, 'tmdb_id'].tolist()
@@ -53,13 +69,19 @@ def export():
             actual = model.predict(ns['X_test'])
             np.testing.assert_allclose(actual, expected.predicted, atol=1e-9, rtol=0)
         else:
-            actual = model.predict_proba(ns['X_test'])[:, list(model.classes_).index(1)]
+            probabilities = class_probabilities(model, ns['X_test'])
+            actual = probabilities[:, 2]
+            np.testing.assert_allclose(probabilities, expected[['bust_probability', 'moderate_probability', 'hit_probability']], atol=1e-9, rtol=0)
             np.testing.assert_allclose(actual, expected.hit_probability, atol=1e-9, rtol=0)
             assert ns['selected_threshold'] == selected['threshold']
-            np.testing.assert_array_equal((actual >= selected['threshold']).astype(int), expected.predicted)
+            np.testing.assert_array_equal(predict_classes(probabilities, selected['threshold']), expected.predicted)
         file = ARTIFACTS / f'{task}_pipeline.joblib'
         joblib.dump(model, file, compress=3)
         manifest['models'][task] = {
+            'model_key': key,
+            'outcome_schema': reference['outcome_schema'],
+            'dependencies_sha256': reference['dependencies_sha256'],
+            'class_labels': {'0': 'Bust', '1': 'Moderate success', '2': 'Hit'} if task == 'success' else None,
             'artifact': file.name, 'artifact_sha256': reports.file_hash(file),
             'dataset': reference['dataset'], 'dataset_sha256': reference['dataset_sha256'],
             'notebook': reference['notebook'], 'code_sha256': reference['code_sha256'],
@@ -84,6 +106,7 @@ def export():
             for version in report['versions'].values():
                 version.pop('predictions', None)
             report.pop('feature_fold_results', None)
+            report.pop('overlap_fold_results', None)
             packaged[f'{task}/{key}'] = report
     (ARTIFACTS / 'comparisons.json').write_text(json.dumps(packaged, indent=2) + '\n')
     (ARTIFACTS / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
@@ -92,4 +115,7 @@ def export():
 
 
 if __name__ == '__main__':
-    export()
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--rating-only', action='store_true', help='Keep the verified existing success pipeline unchanged.')
+    export(rating_only=parser.parse_args().rating_only)

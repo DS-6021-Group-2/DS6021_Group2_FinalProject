@@ -1,13 +1,14 @@
 """Streamlit layout for the DS 6021 project. AI-assisted; see README.md."""
 from pathlib import Path
 import sys
+import json
 
 import pandas as pd
 import streamlit as st
 
 # Also supports Streamlit AppTest when invoked from the repository root.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from model_utils import ROOT, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
+from model_utils import CLASS_LABELS, ROOT, LABELS, load_movie_catalog, load_comparisons, load_prediction_models, predict_movie
 
 st.set_page_config(page_title='Movie Potential | DS 6021', page_icon='🎬', layout='wide')
 st.markdown('''<style>
@@ -26,7 +27,9 @@ button[data-baseweb="tab"] {font-weight:600;}
 # Cache by file modification signatures so existing results refresh without retraining.
 def input_signature():
     paths = [ROOT / 'data/model_data_rating.csv', ROOT / 'data/model_data_success.csv',
-             ROOT / 'Data_visualization/model_reports.py']
+             ROOT / 'Data_visualization/model_reports.py', ROOT / 'Modeling_scripts/financial_outcomes.py',
+             ROOT / 'Modeling_scripts/model_diagnostics.py', ROOT / 'Modeling_scripts/overlap_review.py',
+             ROOT / 'Modeling_scripts/model_workflow.py']
     paths += list((ROOT / 'app/artifacts').glob('*'))
     paths += list((ROOT / 'Modeling_scripts').glob('*/*.ipynb'))
     paths += list((ROOT / 'Data_visualization/results').glob('*/*.json'))
@@ -38,6 +41,16 @@ def read_inputs(signature):
 
 try:
     catalog, (scores, statuses, cohorts) = read_inputs(input_signature())
+    prediction_metadata = json.loads((ROOT / 'app/artifacts/manifest.json').read_text())['models']
+    rating_meta = prediction_metadata['rating']
+    rating_key = rating_meta.get('model_key', Path(rating_meta['notebook']).stem)
+    rating_name = LABELS.get(rating_key, rating_key.replace('_', ' ').title())
+    rating_params = rating_meta['selected_parameters']
+    degree = rating_params.get('preprocessor__numeric__polynomial__degree', 1)
+    rating_details = 'Quadratic features' if degree == 2 else 'Linear features'
+    if 'regression__alpha' in rating_params:
+        rating_details += f" · Alpha {rating_params['regression__alpha']:g}"
+
 except (OSError, ValueError, AssertionError, KeyError) as exc:
     st.error(f'Project data could not be loaded ({type(exc).__name__}). Check the saved model CSVs and app README.')
     st.stop()
@@ -50,7 +63,7 @@ with st.sidebar:
     st.title('Movie Potential')
     st.caption('A movie prediction research project')
     st.success('Live model predictions · later-test movies only.')
-    st.markdown('**Prediction models**\n\nRatings → tuned ridge regression\n\nHit / bust → logistic regression')
+    st.markdown(f'**Prediction models**\n\nRatings → {rating_name}\n\nBust / moderate / hit → logistic regression')
     st.caption('Models are fitted offline. Opening the app never trains them.')
 
 summary = st.columns(3)
@@ -86,14 +99,16 @@ with predict_tab:
     with left, st.container(border=True):
         st.caption('VIEWER RESPONSE')
         st.metric('Predicted viewer rating', f"{prediction['rating']['rating']:.2f} / 10" if prediction else '—')
-        st.caption('Tuned ridge · Quadratic features · Alpha 100')
+        st.caption(f'{rating_name} · {rating_details}')
     with right, st.container(border=True):
         st.caption('BOX-OFFICE PERFORMANCE')
         financial = prediction.get('success') if prediction else None
         st.metric('Estimated hit probability', f"{financial['probability']:.1%}" if financial and 'probability' in financial else '—')
         if financial and 'probability' in financial:
             st.markdown(f"**Predicted outcome: {financial['label']}**")
-            st.caption(f"Logistic regression · Hit threshold {financial['threshold']:.0%}. Model probabilities are not guarantees.")
+            st.write(' · '.join(f'{label}: {probability:.1%}' for label, probability in financial['probabilities'].items()))
+            st.caption(f"Three-class logistic regression · Hit threshold {financial['threshold']:.0%}. Model probabilities are not guarantees.")
+            st.caption('Below the hit threshold, the larger Bust or Moderate success probability determines the label.')
         elif financial:
             st.caption(financial['unavailable'])
         else:
@@ -104,11 +119,11 @@ with predict_tab:
     elif show_actual:
         a, b = st.columns(2)
         a.metric('Actual TMDB viewer rating', f'{movie.vote_average:.2f} / 10')
-        outcome = 'Unavailable' if pd.isna(movie.success) else ('Hit' if movie.success == 1 else 'Bust')
+        outcome = 'Unavailable' if pd.isna(movie.success) else CLASS_LABELS[int(movie.success)]
         b.metric('Actual financial outcome', outcome)
         if pd.isna(movie.success):
             st.caption('This movie is outside the financially eligible cohort. Missing or insufficient financial data is not labeled as a bust.')
-    st.caption('Project benchmark: a hit has reported revenue ≥ 2.5 × production budget; a bust falls below it. This is a revenue-to-budget label, not audited profitability.')
+    st.caption('Project benchmark: Bust: revenue/budget ≤1. Moderate success: 1<ratio<2.5. Hit: ratio ≥2.5. This is a revenue-to-budget label, not audited profitability.')
 
 with compare_tab:
     st.subheader('How do the models compare?')
@@ -130,10 +145,10 @@ with compare_tab:
                               format_func=lambda k, current_task=task: f"{cohorts[(current_task,k)]['Test movies']:,} test movies · from {cohorts[(current_task,k)]['Test starts']} · {k}")
         details = cohorts[(task, cohort)]
         st.caption(f"{details['Dataset']} · {details['Training movies']:,} training / {details['Test movies']:,} test movies · test starts {details['Test starts']}")
-        versions = st.multiselect('Versions to compare', ['Original', 'Settings tuned', 'Validation-selected'],
+        versions = st.multiselect('Versions to compare', ['Original', 'Settings tuned', 'Before overlap trim', 'Validation-selected'],
                                   default=['Original', 'Validation-selected'], key=f'{task}_versions')
         filtered = task_scores.loc[task_scores.Cohort.eq(cohort) & task_scores.Version.isin(versions)].copy()
-        metrics = ['MAE', 'RMSE', 'R2'] if task == 'rating' else ['Hit precision', 'Hit recall', 'Hit F1', 'Accuracy', 'ROC AUC']
+        metrics = ['MAE', 'RMSE', 'R2'] if task == 'rating' else ['Macro F1', 'Moderate recall', 'Moderate F1', 'Hit precision', 'Hit recall', 'Hit F1', 'Accuracy', 'Balanced accuracy', 'ROC AUC', 'Multiclass ROC AUC']
         if filtered.empty:
             st.info('Choose at least one version with saved results.')
         else:
@@ -143,7 +158,7 @@ with compare_tab:
             metric = st.selectbox('Chart metric', metrics, key=f'{task}_metric', format_func=lambda x: 'R²' if x == 'R2' else x)
             chart = filtered.pivot(index='Model', columns='Version', values=metric)
             st.bar_chart(chart, horizontal=True, x_label=metric, y_label='Model')
-        st.caption('Original = fixed baseline; Settings tuned = search on all features; Validation-selected = final feature/settings selection (and threshold for success).')
+        st.caption('Original = fixed baseline; Settings tuned = all-feature search; Before overlap trim = previous selected model; Validation-selected = final overlap-reviewed selection (and hit threshold for success).')
         if not unavailable.empty:
             st.warning('Some models have unavailable results; they remain listed here.')
             st.dataframe(unavailable[['Model', 'Status']], hide_index=True, width='stretch')
@@ -151,8 +166,8 @@ with compare_tab:
             if task == 'rating':
                 st.markdown('**MAE ↓:** average rating error in points. **RMSE ↓:** gives larger errors more weight. **R² ↑:** variation explained relative to the test-set mean; it can be negative.')
             else:
-                st.markdown('**Hit precision:** how often predicted hits are actual hits. **Recall:** how many actual hits are found. **F1:** balances precision and recall. **Accuracy:** fraction of all correct labels. **ROC AUC:** ranking quality across thresholds.')
-                st.caption('The selection goal is ≥70% mean validation hit precision, then highest hit F1. It does not guarantee 70% test precision. Always predicting bust is not a useful hit detector.')
+                st.markdown('**Hit precision:** how often predicted hits are actual hits. **Recall:** how many actual hits are found. **F1:** balances precision and recall. **Accuracy:** fraction of all correct labels. **Macro F1:** equally averages all three class F1 scores. **Moderate recall:** fraction of actual moderate movies identified. **ROC AUC:** Hit vs rest ranking. **Multiclass ROC AUC:** macro average of three one-vs-rest rankings.')
+                st.caption('The selection goal is ≥70% mean validation hit precision, then highest hit F1. It does not guarantee 70% test precision. The hit threshold selects Hit when reached; otherwise the larger Bust/Moderate probability wins. Inspect moderate recall and macro F1 alongside hit metrics.')
     with st.expander('Model inventory and result availability'):
         st.dataframe(statuses, hide_index=True, width='stretch')
 
@@ -165,7 +180,7 @@ with about_tab:
         st.write('Predict TMDB vote_average on a 0–10 scale. Rated movies remain eligible even without usable budgets or revenues.')
     with b, st.container(border=True):
         st.markdown('#### Financial success')
-        st.write('Predict binary hit/bust success. The financial cohort requires reported budget ≥ $250,000 and revenue ≥ $1,000. Hit means revenue ≥ 2.5 × budget.')
+        st.write('Predict three categories: Bust (ratio ≤1), Moderate success (1<ratio<2.5), and Hit (ratio ≥2.5). The financial cohort requires reported budget ≥ $250,000 and revenue ≥ $1,000. Hit means revenue ≥ 2.5 × budget.')
     st.markdown('### Where the information comes from')
     st.write('TMDB supplies movie characteristics, ratings, budgets, revenues, cast and companies. IMDb supplies identities and earlier director film histories; an IMDb actor supplement improves some early five-year windows.')
     st.markdown('### From raw data to predictions')
@@ -178,5 +193,5 @@ with about_tab:
 - Earlier histories update through time: this is rolling evaluation, not one frozen forecast at the split date.
 - Repeated test inspection makes findings exploratory. Model scores and hit likelihoods are not guarantees.
 - PCA was tested with KNN; clustering is not implemented in this layout.
-- Predictions use saved ridge and logistic pipelines fitted only on earlier training movies. The demo includes later-test movies only; financial predictions are unavailable outside the eligible financial cohort.''')
+- Predictions use saved lasso and logistic pipelines fitted only on earlier training movies. The demo includes later-test movies only; financial predictions are unavailable outside the eligible financial cohort.''')
     st.caption('DS 6021 · Group 2 · AI-assisted app layout; implementation and verification notes are in app/README.md.')

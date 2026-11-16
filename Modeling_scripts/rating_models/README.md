@@ -1,105 +1,59 @@
 # Predicting viewer ratings
 
-**Target:** `vote_average`, the TMDB rating on a 0–10 scale.
+**Target:** TMDB `vote_average`, 0–10. **Data:** [model_data_rating.csv](../../data/model_data_rating.csv), 13,276 movies, including movies with unknown finances.
 
-**Input:** [model_data_rating.csv](../../data/model_data_rating.csv), containing **13,276 movies**. Movies do not need reported budgets or revenues to enter this dataset.
+Use `ds6001`, run notebooks from this folder, and Run All. Source/model dataset CSVs are never overwritten by these notebooks.
 
-## Where to change tuning settings
+## Models
 
-Every notebook now starts with **Tuning controls — edit here first**. Change that one settings cell, save, and **Run All**. Later validation sections read those controls instead of resetting them.
-
-- `MODEL_SETTINGS`: the original estimator and settings not searched.
-- `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search. OLS searches preprocessing choices; ridge also searches `alpha`.
-- `FEATURE_GROUPS_TO_COMPARE`: predictor groups to compare.
-- `CUTOFF_DATE` and `N_VALIDATION_SPLITS`: keep consistent across models.
-
-The last cell saves a checked report for the [visualization notebook](../../Data_visualization/model_visualizations.ipynb). See its [guide](../../Data_visualization/README.md) for refreshing graphs.
-
-## What to run
-
-Start with [linear_model.ipynb](linear_model.ipynb). Use `ds6001`, run from this folder, and run cells from top to bottom.
-
-| Notebook | What it tries |
+| Notebook | Method |
 |---|---|
-| [Linear model](linear_model.ipynb) | Linear regression with the larger feature set. |
-| [Ridge](ridge_model.ipynb) | Coefficient shrinkage, with optional quadratic numeric features. |
-| [Lasso](lasso_model.ipynb) | L1 shrinkage, optional quadratic terms, and validation-based feature selection. |
-| [Elastic net](elastic_net_model.ipynb) | Combined L1/L2 shrinkage; jointly tunes alpha, mixing weight, degree, and feature groups. |
-| [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
-| [Random Forest](random_forest.ipynb) | An average of many decision trees. |
-| [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
+| [Linear regression](linear_model.ipynb) | Least squares; tunes numeric representation and missingness indicators. |
+| [Ridge](ridge_model.ipynb) | L2 shrinkage; tunes alpha, degree and missingness indicators. |
+| [Lasso](lasso_model.ipynb) | L1 shrinkage; used by the app. |
+| [Elastic net](elastic_net_model.ipynb) | Combined L1/L2 shrinkage. |
+| [Random Forest](random_forest.ipynb) | Averaged trees. |
+| [Gradient Boosting](gradient_boosting.ipynb) | Sequential trees that reduce remaining loss. |
+| [KNN + PCA](knn_pca.ipynb) | Neighbors after standardized dimensionality reduction; includes a no-PCA validation comparison. |
 
-## Reading the scores
+## Tune near the top
 
-| Score | Meaning | Better direction |
-|---|---|---|
-| **MAE** | Average size of the rating error. MAE 0.5 means about half a rating point off on average. | Lower |
-| **RMSE** | Rating error with a larger penalty for big mistakes. | Lower |
-| **R²** | How much rating variation the model explains relative to predicting the evaluation-set mean. It can be negative. | Higher |
+- `MODEL_SETTINGS` / `PARAM_GRID`: original reference and candidate settings. Alpha scales differ across penalized estimators.
+- `FEATURE_GROUPS_TO_COMPARE`: original cumulative movie/director/actor/company groups.
+- `OVERLAP_TRIMS` and tolerance controls: predefined exclusions evaluated after the original selection.
+- `SHOW_DIAGNOSTIC_DETAILS`: False shows interpretations; True adds technical tables.
+- Keep `CUTOFF_DATE` and `N_VALIDATION_SPLITS` consistent across models.
 
-The baseline predicts **the training mean rating for every movie**. Beat that before claiming the features help.
+Three expanding validation folds remain inside the 9,405-movie training period before **November 18, 2017**. All imputation, encoding, scaling, polynomial expansion, PCA and exact-alias removal are fitted within each training fold. Validation MAE chooses candidates. The later 3,871 test movies never choose features or settings.
 
 ## Current test results
 
-All rows use the same **3,871 later movies**. Model rows show the validation-selected model.
+These are the overlap-reviewed **Selected** versions. **Before overlap trim** preserves the previous selected pipeline separately in reports and app comparisons. Lower MAE/RMSE and higher R² are better.
 
 | Model | MAE ↓ | RMSE ↓ | R² ↑ |
 |---|---:|---:|---:|
-| Training-mean baseline | 0.612 | 0.775 | −0.073 |
-| Detailed linear | 0.553 | 0.696 | 0.133 |
-| Ridge, tuned quadratic features | 0.498 | 0.637 | 0.275 |
-| Lasso, tuned quadratic features | 0.494 | 0.631 | 0.289 |
-| Elastic net, tuned quadratic features | 0.495 | 0.632 | 0.286 |
-| KNN + PCA | 0.537 | 0.685 | 0.161 |
-| Random Forest | 0.511 | 0.648 | 0.248 |
-| Gradient Boosting | 0.504 | 0.640 | 0.267 |
+| Training-mean baseline | 0.612 | 0.775 | -0.073 |
+| Linear regression | 0.550 | 0.693 | 0.140 |
+| Ridge | 0.498 | 0.639 | 0.268 |
+| Lasso | 0.496 | 0.633 | 0.283 |
+| Elastic net | 0.497 | 0.634 | 0.281 |
+| Random Forest | 0.510 | 0.648 | 0.250 |
+| Gradient Boosting | 0.504 | 0.641 | 0.266 |
+| KNN + PCA | 0.538 | 0.685 | 0.160 |
 
-All models now include `log_budget`. Unknown budgets are median-imputed inside training only. Adding budget produced small, mixed rating changes on the same test movies; it did not consistently improve prediction. Results remain exploratory.
+## Overlap review and interpretation
 
-## Finding things in the notebooks
+Each notebook tests dropping genre count while retaining genre flags, then progressively trims overlapping director counts. The original settings candidates are retuned on each representation. Prefer fewer raw predictors within **0.002 validation MAE** of the best candidate; this practical tolerance is not a statistical equivalence test. Polynomial missingness trials remove constant/exactly dependent transformed directions within each training fold. Remaining high VIFs are reported rather than automatically removed.
 
-| Detailed-notebook section | Purpose |
-|---|---|
-| 4 | Run the search using the top `PARAM_GRID` and `TUNING_METRIC`; default selection is validation MAE. Ordinary linear regression has no regularization setting to tune. |
-| 4b | Compare feature groups using training-period validation; linear/ridge jointly compare every configured setting. |
-| 5–6 | Compare baseline/original/selected results and inspect prediction errors. |
-| 7–8 | Compare feature groups and isolate the effect of earlier director ratings. |
+See the [diagnostics guide](../DIAGNOSTICS.md) for before/after predictor counts, VIFs, validation scores, test scores, and exclusions. The diagnostics explain what findings mean and what to try next. Selection improves simplicity/validation, not necessarily every test score.
+
+`log_budget` remains a predictor; unknown budgets are imputed only from training. Current-movie rating, revenue, financial labels and identifiers are excluded. Director histories use strictly earlier years but retrospective source snapshots do not verify historical availability. Actor-history coverage is incomplete and flagged. Repeated inspection means these results are exploratory and need confirmation on a new period.
+
+The final report cell feeds [model visualizations](../../Data_visualization/model_visualizations.ipynb). Save and Run All after changes, refresh those charts, and explicitly rebuild app artifacts offline when served models change.
 
 
-## Keep in mind
+## Short notebook layout
 
-Training ends before **November 18, 2017**: 9,405 training movies and 3,871 test movies. Preprocessing is fitted within training. Current `vote_average` is the target, never an input.
+Each notebook now has five sections: setup/controls, model, validation/tuning, final results, and diagnostics. The preprocessing/estimator remains visible; [model_workflow.py](../model_workflow.py) supplies shared data checks, folds, scoring and report export. There are no repeated post-selection feature-group or director-history fits. The last cell still saves all reference versions for app/visualization comparisons.
 
-Earlier ratings are observed snapshots, not a complete director filmography or verified historical release-time ratings. Early actor-history coverage is incomplete and flagged. History updates through time, so these are rolling predictions. The expanded test population and repeated inspection mean the results remain exploratory; do not compare them directly with old scores on only financially eligible movies.
-
-For KNN + PCA, edit `PCA_SETTINGS` and `PARAM_GRID` near the top. Section 7 shows retained components and a fixed-settings validation comparison against KNN without PCA. No CSVs are changed.
-
-KNN + PCA selected 35 distance-weighted neighbors and 95% retained input variance (42 components). Its test MAE is higher than tuned ridge. At fixed original settings, PCA slightly worsened validation MAE: 0.554 without PCA versus 0.558 with PCA.
-
-## Linear and ridge tuning results
-
-Both notebooks now search numeric degree 1/2 and missing-value indicators; ridge also searches `alpha` from 0.01 to 10,000. Each candidate refits all preprocessing inside three chronological validation folds. Section 4b jointly ranks settings and feature groups by validation MAE. Ordinary linear regression has no shrinkage parameter; degree 2 changes the feature representation. See [scikit-learn's explanation](https://scikit-learn.org/stable/modules/linear_model.html#polynomial-regression-extending-linear-models-with-basis-functions).
-
-| Model | Test MAE before → after | New RMSE | New R² | Goals met |
-|---|---:|---:|---:|---|
-| Linear | 0.553 → 0.553 | 0.696 | 0.133 | None |
-| Ridge | 0.552 → 0.498 | 0.637 | 0.275 | MAE ≤0.50; RMSE ≤0.65 |
-
-Linear retained original settings and movie/director features. Ridge selected **alpha=100**, **quadratic numeric features**, **no missingness indicators**, and movie/director/actor features (38 source predictors, 130 encoded/expanded inputs). The original plain fits remain visible as baselines.
-
-Ridge has not reached R² ≥0.30 or either stretch goal. Its mean validation MAE improved only slightly (0.5175 for the original degree-1 ridge/director candidate versus 0.5169 selected), so the test gain needs confirmation on a new period. Test rows were not used for selection; no additional search was launched after seeing their scores. Dataset CSVs and the date cutoff are unchanged. Section 5 now displays an explicit goal checklist.
-
-## Lasso and elastic net
-
-[Lasso](lasso_model.ipynb) and [elastic net](elastic_net_model.ipynb) use the same cohort, 2017-11-18 cutoff, three chronological folds, and preprocessing structure as ridge. Both search degree 1/2, alpha `[0.001, 0.003, 0.01, 0.03, 0.1]`, and four feature groups; elastic net additionally searches l1_ratio `[0.05, 0.2, 0.5, 0.8]`. Selection uses validation MAE. Convergence warnings raise errors; each notebook shows coefficients, convergence diagnostics, and verified model comparisons. No success models or dataset CSVs were changed.
-
-Both selected **quadratic numeric features**, **alpha=0.003**, and movie/director/actor features. Elastic net selected **l1_ratio=0.8**. Alpha is defined differently from ridge and should not be compared numerically across these estimators.
-
-| Model | Mean validation MAE | Test MAE | Test RMSE | Test R² |
-|---|---:|---:|---:|---:|
-| Ordinary linear regression | 0.5178 | 0.5527 | 0.6959 | 0.1335 |
-| Ridge | 0.5169 | 0.4979 | 0.6366 | 0.2750 |
-| Lasso | 0.5086 | 0.4943 | 0.6305 | 0.2887 |
-| Elastic net | 0.5093 | 0.4949 | 0.6316 | 0.2864 |
-
-**Finding:** lasso has the lowest recorded test MAE among the retained rating models. Elastic net slightly beats ridge but does not beat lasso. These small differences on an already-inspected period need independent confirmation. Both new models meet MAE ≤0.50 and RMSE ≤0.65, but neither reaches R² ≥0.30. No extra search was launched in response to test scores. The app continues to use its existing verified ridge pipeline; both new models appear in comparisons.
+Set `SHOW_EXTRA_COMPARISONS`, `SHOW_COEFFICIENTS` or `SHOW_DIAGNOSTIC_DETAILS` to True near the top for additional tables. Default output shows baseline/selected results, one main plot, and brief diagnostics. KNN retains one short PCA/no-PCA validation comparison. The director-rating experiment lives in [one shared notebook](../../Data_visualization/history_feature_comparison.ipynb).

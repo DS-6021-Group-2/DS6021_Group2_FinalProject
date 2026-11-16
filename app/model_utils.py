@@ -10,6 +10,9 @@ import json
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+sys.path.insert(0, str(ROOT / 'Modeling_scripts'))
+from financial_outcomes import CLASS_LABELS, class_probabilities, predict_classes
 LABELS = {
     'linear_model': 'Linear regression',
     'lasso_model': 'Lasso regression', 'elastic_net_model': 'Elastic net regression',
@@ -18,7 +21,7 @@ LABELS = {
     'knn_pca': 'KNN + PCA', 'logistic_regression': 'Logistic regression',
 }
 VARIANTS = {'Original': 'Original', 'Settings only': 'Settings tuned',
-            'Selected': 'Validation-selected'}
+            'Selected': 'Validation-selected', 'Before overlap trim': 'Before overlap trim'}
 
 
 def load_movie_catalog():
@@ -27,7 +30,7 @@ def load_movie_catalog():
                          usecols=['tmdb_id', 'title_tmdb', 'release_date', 'runtime', 'vote_average'])
     success = pd.read_csv(ROOT / 'data/model_data_success.csv', usecols=['tmdb_id', 'success'])
     assert rating.tmdb_id.is_unique and success.tmdb_id.is_unique
-    assert success.success.isin([0, 1]).all()
+    assert success.success.isin([0, 1, 2]).all()
     catalog = rating.merge(success, on='tmdb_id', how='left', validate='one_to_one')
     manifest = json.loads((ROOT / 'app/artifacts/manifest.json').read_text())
     cutoff = manifest['models']['rating']['cutoff']
@@ -64,6 +67,10 @@ def load_comparisons():
                             raise ValueError('Packaged comparison is stale.')
                     if report_tools.notebook_code_hash(notebook) != report['code_sha256']:
                         raise ValueError('Packaged notebook comparison is stale.')
+                if report.get('dependencies_sha256') != report_tools.dependency_hashes():
+                    raise ValueError('Packaged shared helpers are stale.')
+                if task == 'success' and report.get('outcome_schema') != 'bust-moderate-hit-v1':
+                    raise ValueError('Binary scores cannot be used for the three-class task.')
                 if 'cohort_id' in report:
                     cohort = report['cohort_id']
                 else:
@@ -107,6 +114,11 @@ def load_prediction_models():
             raise ValueError(f'{task} model artifact does not match its manifest.')
         if hashlib.sha256((ROOT / meta['dataset']).read_bytes()).hexdigest() != meta['dataset_sha256']:
             raise ValueError(f'{task} dataset changed since model export.')
+        for name, expected in meta['dependencies_sha256'].items():
+            if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != expected:
+                raise ValueError('Model helpers changed since export.')
+        if task == 'success' and meta.get('outcome_schema') != 'bust-moderate-hit-v1':
+            raise ValueError('Re-export the three-class financial model.')
         nb = nbformat.read(ROOT / meta['notebook'], as_version=4)
         code = [c.source for c in nb.cells if c.cell_type == 'code']
         if hashlib.sha256(json.dumps(code, ensure_ascii=False).encode()).hexdigest() != meta['code_sha256']:
@@ -135,6 +147,10 @@ def predict_movie(movie_id, models):
         if task == 'rating':
             result[task] = {'rating': float(pipeline.predict(inputs)[0])}
         else:
-            probability = float(pipeline.predict_proba(inputs)[0, list(pipeline.classes_).index(1)])
-            result[task] = {'probability': probability, 'label': 'Hit' if probability >= meta['threshold'] else 'Bust', 'threshold': meta['threshold']}
+            probabilities = class_probabilities(pipeline, inputs)
+            predicted_class = int(predict_classes(probabilities, meta['threshold'])[0])
+            result[task] = {'probability': float(probabilities[0, 2]),
+                            'probabilities': {label: float(probabilities[0, code]) for code, label in CLASS_LABELS.items()},
+                            'class': predicted_class, 'label': CLASS_LABELS[predicted_class],
+                            'threshold': meta['threshold']}
     return result

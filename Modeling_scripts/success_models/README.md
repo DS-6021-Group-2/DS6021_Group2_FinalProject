@@ -1,76 +1,58 @@
-# Predicting hits and busts
+# Predicting financial performance
 
-**Target:** `success` — **1 = hit**, **0 = bust**. A hit has reported revenue of at least **2.5 times production budget**; a bust is below that benchmark. These are project labels, not audited profit/loss.
+**Target:** `success` in [model_data_success.csv](../../data/model_data_success.csv), with 6,919 financially eligible movies.
 
-**Input:** [model_data_success.csv](../../data/model_data_success.csv), containing **6,919 movies with usable financial data**.
+| Code | Category | Revenue / production budget | Movies |
+|---|---|---|---:|
+| 0 | Bust | ≤1 | 2,475 |
+| 1 | Moderate success | >1 and <2.5 | 1,940 |
+| 2 | Hit | ≥2.5 | 2,504 |
 
-## Where to change tuning settings
+Missing finances remain unavailable. These categories do not measure audited profit. Raw source data and all predictors are preserved; the cleaned and success-model tables have updated target labels. Earlier director success features still mean **earlier hit fractions**, not averages of category codes.
 
-Every notebook now starts with **Tuning controls — edit here first**. Change that one settings cell, save, and **Run All**. Later validation sections read those controls instead of resetting them.
+## Models
 
-- `MODEL_SETTINGS`: the original estimator and settings not searched.
-- `PARAM_GRID` (detailed models): lists of trial values; these override the original value during search.
-- `FEATURE_GROUPS_TO_COMPARE`: predictor groups to compare.
-- `MIN_VALIDATION_PRECISION` and `THRESHOLDS`: the precision goal and threshold candidates.
-- `CUTOFF_DATE` and `N_VALIDATION_SPLITS`: keep consistent across models.
+- [Logistic regression](logistic_regression.ipynb): regularized three-class linear classifier; used in the app.
+- [Random Forest](random_forest.ipynb): averaged classification trees.
+- [Gradient Boosting](gradient_boosting.ipynb): sequential trees.
+- [KNN + PCA](knn_pca.ipynb): classification by neighboring movies after dimensionality reduction; includes a no-PCA validation comparison.
 
-The last cell saves a checked report for the [visualization notebook](../../Data_visualization/model_visualizations.ipynb). See its [guide](../../Data_visualization/README.md) for refreshing graphs.
+Use `ds6001`, run from this folder, and Run All. No classifier notebook modifies dataset CSVs.
 
-## What to run
+## Tune near the top
 
-Start with [logistic_regression.ipynb](logistic_regression.ipynb). Use `ds6001`, run from this folder, and run cells from top to bottom.
-
-| Notebook | What it tries |
+| Control | Purpose |
 |---|---|
-| [Logistic regression](logistic_regression.ipynb) | A regularized linear classifier. |
-| [KNN with PCA](knn_pca.ipynb) | Standardized inputs compressed with PCA, then nearest-neighbor prediction; joint chronological tuning. |
-| [Random Forest](random_forest.ipynb) | Many decision trees combined. |
-| [Gradient Boosting](gradient_boosting.ipynb) | Trees that successively correct earlier errors. |
+| `MODEL_SETTINGS` | Fixed original reference settings. |
+| `PARAM_GRID` | Candidate estimator/PCA settings. |
+| `FEATURE_GROUPS_TO_COMPARE` | Movie characteristics, then director, actor and company/franchise histories. |
+| `THRESHOLDS`, `MIN_VALIDATION_PRECISION` | Candidate hit thresholds and the mean validation hit precision requirement (0.70). |
+| `SHOW_DIAGNOSTIC_DETAILS` | False: plain-English diagnostics; True: all technical tables. |
 
-## Our selection goal
+Train before **November 18, 2017** (5,535 movies); test on or after it (1,384). Three expanding chronological folds stay inside training. Preprocessing is fitted anew within each fold. Current ratings/financial labels, IDs, revenue and revenue-to-budget ratio are excluded from predictors; log budget is allowed.
 
-**First require at least 70% mean validation hit precision; then choose the highest hit F1 among qualifying candidates.**
+## How a label is selected
 
-| Metric | Plain-English meaning |
-|---|---|
-| **Hit precision** | Of movies predicted to be hits, how many actually are hits? |
-| **Hit recall** | Of actual hits, how many did we find? |
-| **Hit F1** | Combines hit precision and recall, giving both equal weight. |
-| Accuracy | Percentage of all movies classified correctly. |
-| Balanced accuracy | Average recall for hits and busts, giving both classes equal weight. |
+Each classifier predicts probabilities for all three classes. The estimator grid uses ordinary argmax and hit F1 (class 2). Feature/settings/threshold selection then requires ≥70% **mean validation** hit precision and maximizes hit F1 among qualifying candidates. If none qualifies, the original reference is retained and marked infeasible.
 
-F1 itself does not emphasize precision; the separate 70% requirement does. Always predicting bust already gives **65.7% test accuracy** but finds no hits, so accuracy alone is not enough.
+The selected rule chooses Hit if P(Hit) reaches the selected threshold; otherwise it chooses the larger Bust/Moderate probability. The original and settings-only references use a 0.50 hit threshold. Probabilities are unchanged by that decision rule. The validation requirement does not guarantee later test precision.
 
-## Current test results
+## Read these results together
 
-All four candidates met the **validation** precision requirement. The table shows their performance on **1,384 later test movies**; reaching 70% in validation does not guarantee 70% in testing.
+- **Macro F1:** equally weights Bust, Moderate and Hit F1.
+- **Balanced accuracy:** average of the three recalls.
+- **Moderate recall:** how many actual moderate movies are found.
+- **Hit precision / recall / F1:** quality and coverage of predicted hits.
+- **ROC AUC:** Hit vs rest; **Multiclass ROC AUC:** macro average of three one-vs-rest AUCs.
+- **3×3 confusion matrix:** which categories get confused.
 
-| Model | Hit threshold | Test precision | Test recall | Test hit F1 |
-|---|---:|---:|---:|---:|
-| Logistic regression | 0.65 | 64.8% | 26.7% | 0.379 |
-| Random Forest | 0.55 | 60.3% | 27.8% | 0.380 |
-| Gradient Boosting | 0.60 | 55.4% | 29.1% | 0.381 |
-| KNN + PCA | 0.65 | 52.4% | 16.0% | 0.245 |
+Former binary scores cannot be compared directly with this three-class experiment. See the saved notebook tables or the app for current results. Diagnostics explain each finding and suggest candidate experiments in [the guide](../DIAGNOSTICS.md). Test results remain exploratory after repeated inspection; use training validation for further changes.
 
-**Budget update:** all models now include `log_budget`. After rerunning the same validation procedure, logistic test hit F1 rose from 0.200 to 0.379, gradient boosting from 0.314 to 0.381; random forest fell from 0.414 to 0.380. Selection can change settings, features, and thresholds, so these are comparisons of the full procedures. At fixed original settings and threshold 0.5, adding budget increased logistic F1 from 0.500 to 0.531. None of the selected models reached 70% precision on the later test data.
+Overlap review now tests predefined genre/history trims inside training validation, retuning existing candidate settings. Top controls expose the presets and tolerances. **Before overlap trim** preserves the previous selected model; **Validation-selected** includes the final review. See the [diagnostics guide](../DIAGNOSTICS.md) for rules and before/after results. Dataset columns are unchanged.
 
-## Finding things in the notebooks
 
-| Detailed-notebook section | Purpose |
-|---|---|
-| 4 | Run the search using the top controls; compare validation hit F1. |
-| 4b | Apply the precision goal and threshold list from the top controls, then select by F1. |
-| 5–6 | Read original/selected results, confusion matrices, and prediction examples. |
-| 7 | Compare feature groups at the original settings. |
+## Short notebook layout
 
-If no candidate meets 70% validation precision, notebooks report that and keep a clearly labeled original reference; they do not quietly lower the target.
+Each notebook now has five sections: setup/controls, model, validation/tuning, final results, and diagnostics. The preprocessing/estimator remains visible; [model_workflow.py](../model_workflow.py) supplies shared data checks, folds, scoring and report export. There are no repeated post-selection feature-group or director-history fits. The last cell still saves all reference versions for app/visualization comparisons.
 
-## Keep in mind
-
-Train before **November 18, 2017** (5,535 movies); test on or after it (1,384 movies). Select settings/features/thresholds using three chronological validation splits inside training, with training-only preprocessing.
-
-Exclude both `success` and `vote_average`, movie identifiers, raw budget, and revenue from predictors. Earlier histories are incomplete and retrospective. The 70% guard applies to the mean across validation periods, not each period or future movies. Repeated inspection makes these exploratory results, not a future precision guarantee.
-
-For KNN + PCA, edit `PCA_SETTINGS` and `PARAM_GRID` near the top. Section 7 shows retained components and a fixed-settings validation comparison against KNN without PCA. No CSVs are changed.
-
-KNN + PCA selected 15 distance-weighted neighbors and 95% retained input variance (42 components). It met 71.3% mean validation precision, but reached only 52.4% test precision. Its F1 trails the other models. At fixed original settings, PCA slightly worsened validation F1: 0.254 without PCA versus 0.249 with PCA.
+Set `SHOW_EXTRA_COMPARISONS`, `SHOW_COEFFICIENTS` or `SHOW_DIAGNOSTIC_DETAILS` to True near the top for additional tables. Default output shows baseline/selected results, one main plot, and brief diagnostics. KNN retains one short PCA/no-PCA validation comparison. The director-rating experiment lives in [one shared notebook](../../Data_visualization/history_feature_comparison.ipynb).

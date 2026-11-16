@@ -3,7 +3,7 @@
 We predict two things from movie characteristics and earlier film history:
 
 - **Viewer rating:** the movie's TMDB `vote_average`.
-- **Financial success:** a **hit** if revenue reaches at least 2.5 times production budget; a **bust** otherwise.
+- **Financial success:** **bust** (revenue/budget ≤1), **moderate success** (1<ratio<2.5), or **hit** (ratio ≥2.5).
 
 ## Start here
 
@@ -13,7 +13,7 @@ The datasets are already saved. Start with linear or logistic regression; collec
 |---|---|
 | Run the prediction app | [App guide](app/README.md) |
 | Predict viewer ratings | [Linear rating model](Modeling_scripts/rating_models/linear_model.ipynb) |
-| Predict hits and busts | [Logistic success model](Modeling_scripts/success_models/logistic_regression.ipynb) |
+| Predict financial categories | [Logistic success model](Modeling_scripts/success_models/logistic_regression.ipynb) |
 | Compare the other models | [Modeling guide](Modeling_scripts/README.md) |
 | Understand the datasets or variables | [Dataset guide](data/README.md) · [Codebook](CODEBOOK.md) |
 
@@ -27,8 +27,8 @@ Use the **`ds6001` Python kernel** and run notebooks from their own folders, fro
 |---|---|
 | [Collection and cleaning](collecting_and_cleaning_data_scripts/README.md) | Get the source data, join movies to directors, and prepare financial labels. |
 | [Feature engineering](Feature_engineering_scripts/README.md) | Build the two model datasets. |
-| [App](app/README.md) | Live ridge/logistic predictions, all-model comparisons, and project context. |
-| [Modeling](Modeling_scripts/README.md) | Separate rating regressors and hit/bust classifiers. |
+| [App](app/README.md) | Live lasso/logistic predictions, all-model comparisons, and project context. |
+| [Modeling](Modeling_scripts/README.md) | Separate rating regressors and three-class financial classifiers. |
 | [Visualizations](Data_visualization/README.md) | Compare all model results and inspect prediction errors. |
 | [Data](data/README.md) | Saved source files and model inputs. |
 

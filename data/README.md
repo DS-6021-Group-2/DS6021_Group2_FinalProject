@@ -5,7 +5,7 @@
 | Task | Model input | Movies | Columns | Target |
 |---|---|---:|---:|---|
 | Predict viewer ratings | [model_data_rating.csv](model_data_rating.csv) | **13,276** | 45 | `vote_average` |
-| Predict hit or bust | [model_data_success.csv](model_data_success.csv) | **6,919** | 46 | `success` |
+| Predict bust / moderate / hit | [model_data_success.csv](model_data_success.csv) | **6,919** | 46 | `success` |
 
 Both contain **40 predictors** and four identifier/date columns. The success table also retains `vote_average`, but neither current-movie outcome belongs in its predictor inputs. The old shared model filename has been replaced by these two files.
 
@@ -13,9 +13,9 @@ Both contain **40 predictors** and four identifier/date columns. The success tab
 
 **Rating data:** a movie can have a valid viewer rating even without reported finances. This table keeps eligible rated movies from the combined data without budget/revenue filters. It has **6,357 more movies** than the success table.
 
-**Success data:** the label needs reliable budget and revenue values. The cohort keeps budgets of at least **$250,000** and revenues of at least **$1,000**. Revenue at least 2.5 times budget gives `success = 1`; otherwise it is 0. Missing financial values are not labeled as busts.
+**Success data:** the label needs reliable budget and revenue values. The cohort keeps budgets of at least **$250,000** and revenues of at least **$1,000**. `success` is **0 = Bust** (revenue/budget ≤1), **1 = Moderate success** (1<ratio<2.5), or **2 = Hit** (ratio ≥2.5). Exactly 1 is Bust; exactly 2.5 is Hit. Missing financial values are not labeled as busts.
 
-The success CSV is the former model table renamed without changing its contents. Shared movies have identical predictors and ratings in both files. Missing runtimes (8 for ratings, 3 for success) are left for training-only imputation.
+The success cohort and predictors are preserved; its target now has three categories. There are **2,475 Bust**, **1,940 Moderate success**, and **2,504 Hit** movies. Shared movies have identical predictors and ratings in both files. Missing runtimes (8 for ratings, 3 for success) are left for training-only imputation.
 
 ## Other files
 
@@ -42,4 +42,4 @@ The sample favors movies with enough TMDB votes; it is not every movie. Large IM
 
 Reading data does not change a CSV. Export code and incoming Git changes can change files; `.gitignore` does not protect tracked datasets from overwrites.
 
-`log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Source and cleaned CSVs are unchanged.
+`log_budget` uses positive reported budgets. The rating table keeps all movies, including **5,439 unknown budgets** stored as missing values; each training pipeline learns its own median for imputation. The success table has no missing budgets. Raw source CSVs are unchanged. Only `success` was relabeled in the cleaned and success-model tables; rating data and all predictor values were preserved.

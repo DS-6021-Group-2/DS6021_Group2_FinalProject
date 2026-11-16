@@ -30,11 +30,11 @@ The join retains **13,276 unique movies**. Co-directors explain why the combined
 | One row per movie | Groups director IDs/names before movie-level analysis. |
 | Usable financial outcomes | Requires budget and revenue above zero. |
 | Financial floors | Keeps budgets ≥ $250,000 and revenues ≥ $1,000; this also excludes some valid low-budget films. |
-| Target | `success = 1` when revenue ≥ 2.5 × budget; otherwise 0. |
+| Target | `success`: 0 = Bust (ratio ≤1), 1 = Moderate success (1<ratio<2.5), 2 = Hit (ratio ≥2.5). |
 | Runtime | Changes zero to missing for later training-only imputation. |
 | Certification | Fills missing values with `Unknown`; groups R and NC-17 together. |
 
-The result has **2,504 hits out of 6,919 movies**. Zero financial values are treated as unreported, not automatic busts. The separate rating dataset is later built from the broader combined data without these financial filters; see [feature engineering](../Feature_engineering_scripts/README.md).
+The result has **2,475 busts, 1,940 moderate successes, and 2,504 hits out of 6,919 movies**. Zero financial values are treated as unreported, not automatic busts. The separate rating dataset is later built from the broader combined data without these financial filters; see [feature engineering](../Feature_engineering_scripts/README.md).
 
 ## Setup for rebuilding
 

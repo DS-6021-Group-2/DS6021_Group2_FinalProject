@@ -3,12 +3,21 @@
   "python_version": "3.14.8",
   "models": {
     "rating": {
+      "model_key": "lasso_model",
+      "outcome_schema": "rating-v1",
+      "dependencies_sha256": {
+        "Modeling_scripts/financial_outcomes.py": "b13dc7645ed5de500ae05b2370ccda3a83b9bf00753d1b48b24d7e00fabee0a1",
+        "Modeling_scripts/model_diagnostics.py": "1cd1db1dea7dd80310a4663b8b1e5eb80d5429727e9e1ddcabf94c84650765fc",
+        "Modeling_scripts/overlap_review.py": "8522c493cd97ac52e742630d092d56affa9b8b74b89862ad46af60491dde165a",
+        "Modeling_scripts/model_workflow.py": "9951c668635145b3a6c5608acc09a285c327df8747839097ace2548000b9898d"
+      },
+      "class_labels": null,
       "artifact": "rating_pipeline.joblib",
-      "artifact_sha256": "809b29e4a5434e318f1373776e4786043e2be876db26374d66ca629b8091000c",
+      "artifact_sha256": "e99d83047fc587a81a3cbd2b775ff3248ae91db0147b8882460fa9e061fd12f1",
       "dataset": "data/model_data_rating.csv",
       "dataset_sha256": "88f7d844340038dcf7e5792f32509a3fc6c6242cf6101ad66561f42bf1ca9aff",
-      "notebook": "Modeling_scripts/rating_models/ridge_model.ipynb",
-      "code_sha256": "f68fb69a625698a3dc9f06e9873a2505a4d714a490a99a5e9a49ee886e0a834f",
+      "notebook": "Modeling_scripts/rating_models/lasso_model.ipynb",
+      "code_sha256": "c7000064e5c0af398c938a44f65aecd7a774843697667adb163e4c7b4d841c6e",
       "cutoff": "2017-11-18",
       "input_columns": [
         "runtime",
@@ -56,8 +65,6 @@
         "runtime",
         "log_budget",
         "release_year",
-        "n_genres",
-        "imdb_director_count",
         "us_certification",
         "release_month",
         "is_sequel",
@@ -82,12 +89,9 @@
         "genre_documentary",
         "dir_prior_success_rate_smoothed",
         "dir_prior_films_log1p",
-        "dir_years_active_log1p",
-        "dir_prior_known_films_log1p",
         "dir_first_film",
         "dir_no_track_record",
         "dir_prior_rating_smoothed",
-        "dir_prior_rated_films_log1p",
         "dir_no_rating_history",
         "lead_actor_films_5yr_backfilled_log1p",
         "backfill_unavailable"
@@ -98,25 +102,37 @@
       ],
       "threshold": null,
       "selected_parameters": {
-        "preprocessor__numeric__imputer__add_indicator": false,
         "preprocessor__numeric__polynomial__degree": 2,
-        "regression__alpha": 100.0
+        "regression__alpha": 0.003
       },
       "train_count": 9405,
       "test_count": 3871,
       "test_metrics": {
-        "MAE": 0.49792516506773116,
-        "RMSE": 0.6365939682181839,
-        "R2": 0.27496752392454016
+        "MAE": 0.4963226506233389,
+        "RMSE": 0.6330952790997445,
+        "R2": 0.282915109584188
       }
     },
     "success": {
+      "model_key": "logistic_regression",
+      "outcome_schema": "bust-moderate-hit-v1",
+      "dependencies_sha256": {
+        "Modeling_scripts/financial_outcomes.py": "b13dc7645ed5de500ae05b2370ccda3a83b9bf00753d1b48b24d7e00fabee0a1",
+        "Modeling_scripts/model_diagnostics.py": "1cd1db1dea7dd80310a4663b8b1e5eb80d5429727e9e1ddcabf94c84650765fc",
+        "Modeling_scripts/overlap_review.py": "8522c493cd97ac52e742630d092d56affa9b8b74b89862ad46af60491dde165a",
+        "Modeling_scripts/model_workflow.py": "9951c668635145b3a6c5608acc09a285c327df8747839097ace2548000b9898d"
+      },
+      "class_labels": {
+        "0": "Bust",
+        "1": "Moderate success",
+        "2": "Hit"
+      },
       "artifact": "success_pipeline.joblib",
-      "artifact_sha256": "deef725089fcd8dd87b1d7c0d4c9c268ddcfe3abb5b402e02e49a83d6487d3a4",
+      "artifact_sha256": "6ecd818be6ff302d8cd49b5fe2a9c0c22a57a5acd1881598e73d4d18a311f324",
       "dataset": "data/model_data_success.csv",
-      "dataset_sha256": "d157f4f50ecddb24f12f6aa374837ad7fc8b779c0eecfd60078ab759258b9084",
+      "dataset_sha256": "b7976d8e19bcb0122caab7940e9f4cc8a4149811f2f43c46dd54c894eac8bbd0",
       "notebook": "Modeling_scripts/success_models/logistic_regression.ipynb",
-      "code_sha256": "b8122cfbb086a3b36c02a71a76c90ce7e0882f3abfbf35b5871b878c3e7474f5",
+      "code_sha256": "a6d01321112ef4c2db6938bbef27941f5eb99c45590f47066e11b2ee95ebae4b",
       "cutoff": "2017-11-18",
       "input_columns": [
         "runtime",
@@ -164,7 +180,6 @@
         "runtime",
         "log_budget",
         "release_year",
-        "n_genres",
         "imdb_director_count",
         "us_certification",
         "release_month",
@@ -196,23 +211,40 @@
         "dir_no_track_record",
         "dir_prior_rating_smoothed",
         "dir_prior_rated_films_log1p",
-        "dir_no_rating_history"
+        "dir_no_rating_history",
+        "lead_actor_films_5yr_backfilled_log1p",
+        "backfill_unavailable",
+        "company_films_5yr_log1p",
+        "franchise_prior_films_log1p"
       ],
       "categorical_columns": [
         "us_certification",
         "release_month"
       ],
-      "threshold": 0.65,
-      "selected_parameters": {},
+      "threshold": 0.7,
+      "selected_parameters": {
+        "classifier__C": 10.0,
+        "classifier__class_weight": null
+      },
       "train_count": 5535,
       "test_count": 1384,
       "test_metrics": {
-        "Accuracy": 0.6986994219653179,
-        "Balanced accuracy": 0.5957304151467778,
-        "Hit precision": 0.6479591836734694,
-        "Hit recall": 0.2673684210526316,
-        "Hit F1": 0.37853949329359166,
-        "ROC AUC": 0.6967865207573389
+        "Accuracy": 0.45303468208092484,
+        "Balanced accuracy": 0.4399220837164761,
+        "Macro F1": 0.4239754269990071,
+        "ROC AUC": 0.6966105031555787,
+        "Multiclass ROC AUC": 0.6507733869223523,
+        "Log loss": 1.0506515564009362,
+        "Multiclass Brier": 0.6248058076168098,
+        "Bust precision": 0.5312046444121916,
+        "Bust recall": 0.6432337434094904,
+        "Bust F1": 0.5818759936406995,
+        "Moderate precision": 0.28679245283018867,
+        "Moderate recall": 0.4470588235294118,
+        "Moderate F1": 0.34942528735632183,
+        "Hit precision": 0.6606060606060606,
+        "Hit recall": 0.2294736842105263,
+        "Hit F1": 0.340625
       }
     }
   }
