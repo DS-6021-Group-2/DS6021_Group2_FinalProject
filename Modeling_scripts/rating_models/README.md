@@ -50,7 +50,7 @@ All rows use the same **3,871 later movies**. Detailed-model rows show the valid
 | Ridge | 0.552 | 0.695 | 0.137 |
 | Support Vector Regression | 0.475 | 0.606 | 0.343 |
 | Random Forest | 0.511 | 0.648 | 0.248 |
-| Gradient Boosting | 0.504 | 0.640 | 0.267 |
+| Gradient Boosting | 0.501 | 0.635 | 0.278 |
 
 All models now include `log_budget`. Unknown budgets are median-imputed inside training only. Adding budget produced small, mixed rating changes on the same test movies; it did not consistently improve prediction. The simple notebook also shows its optional validation-selected preset separately. Results remain exploratory.
 
