@@ -34,7 +34,7 @@ This reruns the lasso and logistic notebooks' tagged training/selection cells in
 Use the connected account and these settings after the changes are on GitHub:
 
 - Repository: `DS-6021-Group-2/DS6021_Group2_FinalProject`
-- Branch: **Walt** (the existing Cloud deployment; fast-forward it from tested `main` when publishing).
+- Branch: **main**.
 - Main file: **app/app.py**
 - Python: **3.14**, matching ds6001; confirm the platform offers it.
 - Dependencies: `app/requirements.txt` (matching pinned model-library versions).

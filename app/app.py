@@ -157,7 +157,7 @@ with compare_tab:
             st.dataframe(display, hide_index=True, width='stretch', column_config={c: st.column_config.NumberColumn(format='%.3f') for c in display if c not in ['Model', 'Version']})
             metric = st.selectbox('Chart metric', metrics, key=f'{task}_metric', format_func=lambda x: 'R²' if x == 'R2' else x)
             chart = filtered.pivot(index='Model', columns='Version', values=metric)
-            st.bar_chart(chart, horizontal=True, x_label=metric, y_label='Model')
+            st.bar_chart(chart, horizontal=True, stack=False, x_label='Model', y_label=metric)
         st.caption('Original = fixed baseline; Settings tuned = all-feature search; Before overlap trim = previous selected model; Validation-selected = final overlap-reviewed selection (and hit threshold for success).')
         if not unavailable.empty:
             st.warning('Some models have unavailable results; they remain listed here.')
