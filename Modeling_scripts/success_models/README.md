@@ -16,6 +16,7 @@ Missing finances remain unavailable. These categories do not measure audited pro
 - [Random Forest](random_forest.ipynb): averaged classification trees.
 - [Gradient Boosting](gradient_boosting.ipynb): sequential trees.
 - [KNN + PCA](knn_pca.ipynb): classification by neighboring movies after dimensionality reduction; includes a no-PCA validation comparison.
+- [KNN](knn.ipynb): plain KNN with the same encoding, scaling, neighbor/weight candidates and chronological evaluation, without PCA.
 
 Use `ds6001`, run from this folder, and Run All. No classifier notebook modifies dataset CSVs.
 
@@ -57,7 +58,16 @@ Overlap review now tests predefined genre/history trims inside training validati
 
 Each notebook now has five sections: setup/controls, model, validation/tuning, final results, and diagnostics. The preprocessing/estimator remains visible; [model_workflow.py](../helpers/model_workflow.py) supplies shared data checks, folds, scoring and report export. There are no repeated post-selection feature-group or director-history fits. The last cell still saves all reference versions for app/visualization comparisons.
 
-Set `SHOW_EXTRA_COMPARISONS`, `SHOW_COEFFICIENTS` or `SHOW_DIAGNOSTIC_DETAILS` to True near the top for additional tables. Default output shows baseline/selected results, one main plot, and brief diagnostics. KNN retains one short PCA/no-PCA validation comparison. The director-rating experiment lives in [one shared notebook](../../Data_visualization/history_feature_comparison.ipynb).
+Set `SHOW_EXTRA_COMPARISONS`, `SHOW_COEFFICIENTS` or `SHOW_DIAGNOSTIC_DETAILS` to True near the top for additional tables. Default output shows baseline/selected results, one main plot, and brief diagnostics. KNN + PCA retains one short PCA/no-PCA validation comparison. The director-rating experiment lives in [one shared notebook](../../Data_visualization/history_feature_comparison.ipynb).
+
+Plain KNN and KNN + PCA select features/settings independently. Their final scores compare the full procedures; use the fixed-settings ablation inside the PCA notebook to isolate PCA's effect.
+
+| Selected model; same 1,384 test movies | Macro F1 | Moderate recall | Hit precision | Hit recall | Hit F1 |
+|---|---:|---:|---:|---:|---:|
+| KNN | 0.405 | 25.0% | 55.9% | 26.9% | 0.364 |
+| KNN + PCA | 0.412 | 28.2% | 56.1% | 25.3% | 0.348 |
+
+Plain KNN has slightly higher hit F1; PCA has higher macro F1 and moderate recall. Neither reaches 70% test hit precision. These test scores describe performance and do not select settings.
 
 
 ## Latest main integration

@@ -18,7 +18,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def verify(artifacts=False):
     paths=sorted((ROOT/'Modeling_scripts').glob('*_models/*.ipynb'))
-    assert len(paths)==12
+    assert len(paths)==13
     for path in paths:
         task=path.parent.name.removesuffix('_models');spec=load_model_spec(task,path.stem)
         assert spec['CUTOFF_DATE']==CUTOFF_DATE and spec['N_VALIDATION_SPLITS']==N_VALIDATION_SPLITS
@@ -66,7 +66,7 @@ def verify(artifacts=False):
         manifest=json.loads((ROOT/'app/artifacts/manifest.json').read_text())
         assert manifest['models']['success']['class_labels']=={str(k):v for k,v in CLASS_LABELS.items()}
         assert manifest['models']['success']['dataset']=='data/model_data_success.csv'
-    print('PASS: 12 active models share dates/folds, task objectives and canonical inputs; 0 Bust / 1 Moderate / 2 Hit agree across cleaned/model/app data; full history ablation removes exactly nine features.')
+    print(f'PASS: {len(paths)} active models share dates/folds, task objectives and canonical inputs; 0 Bust / 1 Moderate / 2 Hit agree across cleaned/model/app data; full history ablation removes exactly nine features.')
 
 
 if __name__=='__main__':

@@ -98,5 +98,6 @@ The latest main integration retains partner grids/exclusions and uses the shared
 | Random Forest | 32 → 30 | 0 → 0 | 0.1867 → 0.2087 | 0.4130 → 0.4231 |
 | Gradient Boosting | 38 → 33 | 23 → 2 | 0.2448 → 0.2453 | 0.4172 → 0.4246 |
 | KNN + PCA | 40 → 37 | 0 → 0 | 0.1852 → 0.1852 | 0.4070 → 0.4124 |
+| KNN | 40 → 37 | 39 → 18 | 0.1267 → 0.1751 | 0.4044 → 0.4050 |
 
 The common precision requirement is a mean training-validation selection rule, not a test guarantee. Original selected references remain available as Before overlap trim. The separate full-history experiment uses nested validation and can have explicitly infeasible inner goals.

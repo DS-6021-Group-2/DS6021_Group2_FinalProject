@@ -15,7 +15,7 @@ Lasso uses the validation-selected representation, penalty and trimmed feature l
 
 ## Models and comparisons
 
-`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 12 implemented model notebooks. The loader checks artifact hashes, dataset/code/shared-helper hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
+`artifacts/` contains two compact fitted pipelines, a provenance manifest, and metrics for all 13 implemented model notebooks. The loader checks artifact hashes, dataset/code/shared-helper hashes, and scikit-learn version before loading models. Do not load uploaded/untrusted joblib files.
 
 Comparisons prefer current local `Data_visualization/results/` reports and fall back to packaged metrics when those ignored files are absent on a fresh clone. Both sources require matching dataset/code/writer/shared-helper hashes and the three-class outcome schema. Stale results are marked unavailable. Charts keep evaluation cohorts separate. CSVs and source notebooks are read-only inputs.
 
@@ -28,6 +28,8 @@ Only needed after changing model code, selection, or datasets. First ensure all 
 ```
 
 This reruns the lasso and logistic notebooks' tagged training/selection cells in memory, fits only earlier training rows, and refuses to export unless every held-out prediction matches the notebook's saved report. It also packages comparison metrics. Use `--rating-only` to export lasso while retaining the verified success pipeline without fitting it again. It does not rewrite notebooks or CSVs. Commit updated artifacts together with their matching source code/data.
+
+After adding a comparison model, use `app/export_models.py --comparisons-only` with the same Python command to refresh metrics without retraining or changing either prediction pipeline. This requires current local reports for every model.
 
 ## Deploy to Streamlit Community Cloud
 

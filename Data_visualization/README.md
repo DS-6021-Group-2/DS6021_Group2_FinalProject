@@ -1,6 +1,6 @@
 # Model visualizations
 
-Open [model_visualizations.ipynb](model_visualizations.ipynb) for graphs comparing **eight rating models and four success models**. Saved outputs can be viewed without retraining.
+Open [model_visualizations.ipynb](model_visualizations.ipynb) for graphs comparing **eight rating models and five success models**. Saved outputs can be viewed without retraining.
 
 ## Refresh graphs
 

@@ -95,6 +95,18 @@ def export(rating_only=False):
             'test_metrics': selected['test_metrics'],
         }
         print(f'{task}: exported pipeline; all {len(ids):,} test predictions match notebook.', flush=True)
+    package_comparisons(reports)
+    (ARTIFACTS / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    assert all(reports.file_hash(p) == h for p, h in before.items())
+
+
+def package_comparisons(reports=None):
+    """Refresh verified metrics only; leave fitted prediction pipelines unchanged."""
+    if reports is None:
+        spec = importlib.util.spec_from_file_location('export_reports', ROOT / 'Data_visualization/model_reports.py')
+        reports = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(reports)
+    before = {p: reports.file_hash(p) for p in (ROOT / 'data').glob('*.csv')}
     # Compact, portable metrics: no duplicate prediction arrays or fitted models.
     packaged = {}
     for task in ['rating', 'success']:
@@ -111,7 +123,6 @@ def export(rating_only=False):
             report.pop('overlap_fold_results', None)
             packaged[f'{task}/{key}'] = report
     (ARTIFACTS / 'comparisons.json').write_text(json.dumps(packaged, indent=2) + '\n')
-    (ARTIFACTS / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     assert all(reports.file_hash(p) == h for p, h in before.items())
     print(f'{len(packaged)} comparison reports packaged. All CSVs unchanged.', flush=True)
 
@@ -119,5 +130,11 @@ def export(rating_only=False):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--rating-only', action='store_true', help='Keep the verified existing success pipeline unchanged.')
-    export(rating_only=parser.parse_args().rating_only)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--rating-only', action='store_true', help='Keep the verified existing success pipeline unchanged.')
+    mode.add_argument('--comparisons-only', action='store_true', help='Package current comparison reports without fitting or rewriting prediction pipelines.')
+    args = parser.parse_args()
+    if args.comparisons_only:
+        package_comparisons()
+    else:
+        export(rating_only=args.rating_only)
